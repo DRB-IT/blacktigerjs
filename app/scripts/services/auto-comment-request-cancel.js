@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**
@@ -25,7 +26,7 @@ $btmod.factory('AutoCommentRequestCancelSvc', function ($rootScope, $timeout, CO
     }
 
     var updateCancelPromise = function (channel, newPromise) {
-        $log.debug("Updating cancel promise. [channel=" + channel + ";newPromise=" + newPromise + "]");
+        $log.debug('Updating cancel promise. [channel=' + channel + ';newPromise=' + newPromise + ']');
         if (commentCancelPromiseArray[channel]) {
             $timeout.cancel(commentCancelPromiseArray[channel]);
         }
@@ -38,9 +39,9 @@ $btmod.factory('AutoCommentRequestCancelSvc', function ($rootScope, $timeout, CO
 
     $rootScope.$on('PushEvent.CommentRequest', function (event, roomNo, channel) {
         if (started) {
-            $log.debug("CommentRequest intercepted. Creating new timeout.");
+            $log.debug('CommentRequest intercepted. Creating new timeout.');
             var promise = $timeout(function () {
-                $log.debug("Broadcasting CommentRequestCancel event. [room=" + roomNo + ";channel=" + channel + "]");
+                $log.debug('Broadcasting CommentRequestCancel event. [room=' + roomNo + ';channel=' + channel + ']');
                 $rootScope.$broadcast('PushEvent.CommentRequestCancel', roomNo, channel);
             }, timeout);
             updateCancelPromise(channel, promise);
@@ -49,7 +50,7 @@ $btmod.factory('AutoCommentRequestCancelSvc', function ($rootScope, $timeout, CO
 
     $rootScope.$on('PushEvent.CommentRequestCancel', function (event, roomNo, channel) {
         if (started) {
-            $log.debug("CommentRequestCancel intercepted. Cancelleing any related timeouts.");
+            $log.debug('CommentRequestCancel intercepted. Cancelleing any related timeouts.');
             updateCancelPromise(channel);
         }
 

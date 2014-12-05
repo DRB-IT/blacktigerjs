@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**
@@ -47,17 +48,17 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
             }
         }
         return count;
-    }
+    };
 
     var handleConfStart = function (event, room) {
         var existingRoom = getRoomById(room.id);
-        $log.debug("ConfStartEvent [room=" + room + "]");
+        $log.debug('ConfStartEvent [room=' + room + ']');
         if (existingRoom === null) {
             if (!angular.isArray(room.participants)) {
                 room.participants = [];
             }
             rooms.push(room);
-            $rootScope.$broadcast("Meeting.Start", room);
+            $rootScope.$broadcast('Meeting.Start', room);
         }
     };
 
@@ -66,7 +67,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
 
         if (room !== null) {
             rooms.splice(rooms.indexOf(room), 1);
-            $rootScope.$broadcast("Meeting.End", room);
+            $rootScope.$broadcast('Meeting.End', room);
         }
     };
 
@@ -76,7 +77,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
 
         if (existingParticipant === null) {
             room.participants.push(participant);
-            $rootScope.$broadcast("Meeting.Join", room, participant);
+            $rootScope.$broadcast('Meeting.Join', room, participant);
         }
     };
 
@@ -102,57 +103,57 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
         if (participant !== null) {
             i = room.participants.indexOf(participant);
             room.participants.splice(i, 1);
-            $rootScope.$broadcast("Meeting.Leave", room, participant);
+            $rootScope.$broadcast('Meeting.Leave', room, participant);
         }
-    }
+    };
 
     var handleCommentRequest = function (event, roomNo, channel) {
-        var room = getRoomById(roomNo), i;
+        var room = getRoomById(roomNo);
         var participant = getParticipantFromRoomByChannel(room, channel);
 
         if (participant !== null && !participant.commentRequested) {
             participant.commentRequested = true;
-            $rootScope.$broadcast("Meeting.Change", room, participant);
+            $rootScope.$broadcast('Meeting.Change', room, participant);
         }
-    }
+    };
 
     var handleCommentRequestCancel = function (event, roomNo, channel) {
-        var room = getRoomById(roomNo), i;
+        var room = getRoomById(roomNo);
         var participant = getParticipantFromRoomByChannel(room, channel);
 
         if (participant !== null && participant.commentRequested) {
             participant.commentRequested = false;
-            $rootScope.$broadcast("Meeting.Change", room, participant);
+            $rootScope.$broadcast('Meeting.Change', room, participant);
         }
-    }
+    };
 
     var handleMute = function (event, roomNo, channel) {
-        var room = getRoomById(roomNo), i;
+        var room = getRoomById(roomNo);
         var participant = getParticipantFromRoomByChannel(room, channel);
 
         if (participant !== null && !participant.muted) {
             participant.muted = true;
-            $rootScope.$broadcast("Meeting.Change", room, participant);
+            $rootScope.$broadcast('Meeting.Change', room, participant);
         }
-    }
+    };
 
     var handleUnmute = function (event, roomNo, channel) {
-        var room = getRoomById(roomNo), i;
+        var room = getRoomById(roomNo);
         var participant = getParticipantFromRoomByChannel(room, channel);
 
         if (participant !== null && participant.muted) {
             participant.muted = false;
-            $rootScope.$broadcast("Meeting.Change", room, participant);
+            $rootScope.$broadcast('Meeting.Change', room, participant);
         }
-    }
+    };
 
     var handlePhoneBookUpdate = function (event, number, name) {
-        $log.debug("MeetingSvc:handlePhoneBookUpdate");
+        $log.debug('MeetingSvc:handlePhoneBookUpdate');
         angular.forEach(rooms, function (room) {
             angular.forEach(room.participants, function (participant) {
                 if (number === participant.phoneNumber) {
                     participant.name = name;
-                    $rootScope.$broadcast("Meeting.Change", room, participant);
+                    $rootScope.$broadcast('Meeting.Change', room, participant);
                 }
             });
         });

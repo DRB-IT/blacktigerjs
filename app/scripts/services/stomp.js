@@ -1,3 +1,4 @@
+/*global $btmod, Stomp, SockJS*/
 'use strict';
 
 /**
@@ -29,20 +30,20 @@ $btmod.factory('StompSvc', function ($rootScope) {
         this.stompClient.send(queue, headers, data);
     };
 
-    NGStomp.prototype.connect = function (user, password, on_connect, on_error, vhost) {
+    NGStomp.prototype.connect = function (user, password, onConnect, onError) {
         // The Spring Stomp implementation does not like user/password, even though it should just ignore it.
         // Sending empty headers instead of user/pass.
         this.stompClient.connect({},
                 function (frame) {
                     $rootScope.$apply(function () {
-                        on_connect.apply(stompClient, frame);
+                        onConnect.apply(stompClient, frame);
                     });
                 },
                 function (frame) {
                     $rootScope.$apply(function () {
-                        on_error.apply(frame);
+                        onError.apply(frame);
                     });
-                } /*, vhost*/);
+                });
     };
 
     NGStomp.prototype.disconnect = function (callback) {

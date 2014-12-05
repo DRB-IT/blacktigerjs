@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**
@@ -14,8 +15,10 @@
 $btmod.factory('SystemSvc', function ($http, blacktiger) {
     return {
         getSystemInfo: function () {
-            return $http.get(blacktiger.getServiceUrl() + 'system/information').then(function (response) {
-                return response.data;
+            return $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
+                return data;
+            }).error(function(data) {
+                return data;
             });
         }
     };

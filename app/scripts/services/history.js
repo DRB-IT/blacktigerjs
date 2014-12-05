@@ -1,3 +1,4 @@
+/*global angular, $btmod*/
 'use strict';
 
 /**
@@ -13,7 +14,7 @@
  * On every update this service will broadcast 'History.Updated' without any parameters.
  */
 $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $log) {
-    $log.debug("Initializing HistorySvc");
+    $log.debug('Initializing HistorySvc');
     var historyCookieName = 'meetingHistory-' + blacktiger.getInstanceId();
     var history = $cookieStore.get(historyCookieName);
 
@@ -35,7 +36,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
     };
 
     var resetHistory = function () {
-        $log.debug("Resetting history data");
+        $log.debug('Resetting history data');
         history = {};
         $cookieStore.put(historyCookieName, {});
         fireUpdated();
@@ -51,7 +52,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
     };
 
     var handleConferenceStartEvent = function (event, room, initializing) {
-        $log.debug("HistorySvc:handleConferenceStart");
+        $log.debug('HistorySvc:handleConferenceStart');
         var i;
         if (history[room.id] === undefined) {
             createRoomEntry(room.id);
@@ -63,11 +64,11 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
                 handleJoinEvent(undefined, room.id, room.participants[i], initializing);
             }
         }
-    }
+    };
 
     var handleJoinEvent = function (event, roomNo, participant, resume) {
-        $log.debug("HistorySvc:handleJoinEvent");
-        var entries, entry, call, key, i;
+        $log.debug('HistorySvc:handleJoinEvent');
+        var entries, entry, call, key;
 
         //Ignore the host. It will not be part of the history.
         if (participant.host) {
@@ -79,7 +80,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
         }
 
         if (!angular.isDefined(participant.callerId)) {
-            throw "Participant does not have a callerId specified.";
+            throw 'Participant does not have a callerId specified.';
         }
 
         entries = history[roomNo];
@@ -121,7 +122,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
     };
 
     var handleLeaveEvent = function (event, roomNo, channel) {
-        $log.debug("HistorySvc:handleLeaveEvent");
+        $log.debug('HistorySvc:handleLeaveEvent');
         var entries, entry, i, key, call, changed = false;
 
         if (!angular.isDefined(history[roomNo])) {
@@ -139,12 +140,11 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
                         changed = true;
                     }
                 }
-                break;
-
+                
                 entry.totalDuration = totalDurationForEntry(entry);
             }
         }
-
+        
         if (changed) {
             $cookieStore.put(historyCookieName, history);
             fireUpdated();
@@ -152,7 +152,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
     };
 
     var handlePhoneBookUpdate = function (event, number, name) {
-        $log.debug("HistorySvc:handlePhoneBookUpdate");
+        $log.debug('HistorySvc:handlePhoneBookUpdate');
         angular.forEach(history, function (entries) {
             angular.forEach(entries, function (entry) {
                 if (number === entry.phoneNumber) {
@@ -169,12 +169,13 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
             throw 'Room must be specified as String.';
         }
 
-        var array = [], key, entries, entry, _active, i, call, accepted, _room;
-        $log.debug("Finding entries [room=" + room + ";callerId=" + callerId + ";active=" + active + "]");
+        var array = [], key, entry, _active, i, call, accepted, _room;
+        $log.debug('Finding entries [room=' + room + ';callerId=' + callerId + ';active=' + active + ']');
         for (_room in history) {
             if (!angular.isDefined(room) || room === _room) {
                 for (key in history[_room]) {
                     accepted = true;
+                    _active = false;
                     entry = history[_room][key];
 
                     if (angular.isDefined(callerId)) {
@@ -202,9 +203,9 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
                 }
             }
         }
-        $log.debug("Found " + array.length + " entries");
+        $log.debug('Found ' + array.length + ' entries');
         return array;
-    }
+    };
 
     $rootScope.$on('PushEvent.ConferenceStart', handleConferenceStartEvent);
     $rootScope.$on('PushEvent.Join', handleJoinEvent);
@@ -213,11 +214,11 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
 
     return {
         getTotalDurationByRoomAndCallerId: function (room, callerId) {
-            var duration = 0, now, entries = doFind(angular.isObject(room) ? room.id : room, callerId);
+            var duration = 0, entries = doFind(angular.isObject(room) ? room.id : room, callerId);
             if (entries && entries.length > 0) {
                 duration = totalDurationForEntry(entries[0]);
             } else {
-                $log.debug("HistorySvc.getTotalDurationByRoomAndCallerId: No entry found [room=" + room + ";callerId=" + callerId + "]");
+                $log.debug('HistorySvc.getTotalDurationByRoomAndCallerId: No entry found [room=' + room + ';callerId=' + callerId + ']');
             }
             return duration;
         },

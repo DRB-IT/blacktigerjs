@@ -1,3 +1,4 @@
+/*exported $btmod */
 'use strict';
 
 /**
@@ -7,7 +8,7 @@
  * # blacktigerjsApp
  *
  */
-var $btmod = angular.module('blacktigerjsApp', [
+var $btmod = angular.module('blacktiger-service', [
     'ngCookies',
     'ngResource',
     'LocalStorageModule'

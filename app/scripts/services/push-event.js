@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**
@@ -46,7 +47,7 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
                 $rootScope.$broadcast('PushEvent.' + event.type, event.roomNo, channel);
                 break;
             default:
-                $log.warn("Unknown push event was not broadcast [type=" + event.type + "]");
+                $log.warn('Unknown push event was not broadcast [type=' + event.type + ']');
                 break;
         }
 
@@ -54,7 +55,7 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
 
     var initializeSocket = function () {
         var deferred = $q.defer();
-        stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket');
+        stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
         stompClient.connect(null, null, function () {
             //+ currentRoom
             RoomSvc.query('full').$promise.then(function (result) {
@@ -65,12 +66,12 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
                 });
 
                 if (rooms.length === 1) {
-                    stompClient.subscribe("/queue/events/" + rooms[0].id, function (message) {
+                    stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
                         var e = angular.fromJson(message.body);
                         handleEvent(e);
                     });
                 } else if (rooms.length > 1) {
-                    stompClient.subscribe("/queue/events/*", function (message) {
+                    stompClient.subscribe('/queue/events/*', function (message) {
                         var e = angular.fromJson(message.body);
                         handleEvent(e);
                     });

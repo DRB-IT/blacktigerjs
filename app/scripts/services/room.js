@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**

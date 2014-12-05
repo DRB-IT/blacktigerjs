@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**
@@ -37,13 +38,13 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
 
             if (token) {
                 authHeader = 'Basic ' + token;
-                return $http.get(blacktiger.getServiceUrl() + "system/authenticate", {
+                return $http.get(blacktiger.getServiceUrl() + 'system/authenticate', {
                     headers: {
                         'Authorization': authHeader
                     }
                 }).then(function (response) {
                     if (response.status !== 200) {
-                        var reason = response.status == 404 ? null : response.data;
+                        var reason = response.status === 404 ? null : response.data;
                         if (!reason || '' === reason) {
                             reason = {
                                 message: 'Unable to communicate with server'
@@ -70,7 +71,7 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
                     $log.info('Logged in as ' + user.username);
                     currentUser = user;
                     $rootScope.currentUser = user;
-                    $rootScope.$broadcast("login", user);
+                    $rootScope.$broadcast('login', user);
                     return user;
                 });
             } else {
@@ -85,10 +86,10 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
         deauthenticate: function () {
             $http.defaults.headers.common.Authorization = undefined;
             localStorageService.remove('LoginToken');
-            $rootScope.$broadcast("logout", currentUser);
+            $rootScope.$broadcast('logout', currentUser);
             currentUser = null;
             $rootScope.currentUser = null;
-            $rootScope.$broadcast("afterLogout", currentUser);
+            $rootScope.$broadcast('afterLogout', currentUser);
 
         }
     };

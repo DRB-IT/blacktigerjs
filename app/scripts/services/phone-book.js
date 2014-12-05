@@ -1,3 +1,4 @@
+/*global $btmod*/
 'use strict';
 
 /**
@@ -10,7 +11,7 @@
 $btmod.factory('PhoneBookSvc', function ($http, blacktiger, $rootScope) {
     return {
         updateEntry: function (phoneNumber, name) {
-            return $http.put(blacktiger.getServiceUrl() + 'phonebook/' + phoneNumber, name).then(function (response) {
+            return $http.put(blacktiger.getServiceUrl() + 'phonebook/' + phoneNumber, name).then(function () {
                 $rootScope.$broadcast('PhoneBook.Update', phoneNumber, name);
                 return;
             });

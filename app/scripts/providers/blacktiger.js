@@ -1,4 +1,4 @@
-/*global angular, $btmod*/
+/*global $btmod*/
 'use strict';
 
 /**
@@ -8,13 +8,13 @@
  * # blacktigerProvider
  * Provider of basic blacktiger configuration methods.
  */
-$btmod.provider('blacktiger', function ($window) {
-    var serviceUrl = ''
+$btmod.provider('blacktiger', function () {
+    var serviceUrl = '';
 
     var instanceId = window.name;
-    if (!instanceId || "" === instanceId) {
-        $window.name = new Date().getTime();
-        instanceId = $window.name;
+    if (!instanceId || '' === instanceId) {
+        window.name = new Date().getTime();
+        instanceId = window.name;
     }
 
     var innerSetServiceUrl = function (url) {
@@ -32,9 +32,6 @@ $btmod.provider('blacktiger', function ($window) {
                 return serviceUrl;
             },
             setServiceUrl: innerSetServiceUrl,
-            getLanguageNames: function () {
-                return languageNames;
-            },
             getInstanceId: function () {
                 return instanceId;
             }
