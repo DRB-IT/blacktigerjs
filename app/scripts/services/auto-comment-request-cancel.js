@@ -15,16 +15,15 @@
  * each 'PushEvent.CommentRequest' it will register the participant and a timer in order to broadcast a 'PushEvent.CommentRequestCancel' 
  * for the participant. The cancel requests will be broadcast if and only if, the participant hasn't triggered it himself.
  */
-$btmod
-        .factory('AutoCommentRequestCancelSvc', function ($rootScope, $timeout, CONFIG, $log) {
-    var commentCancelPromiseArray = [], 
+$btmod.factory('AutoCommentRequestCancelSvc', function ($rootScope, $timeout, CONFIG, $log) {
+    var commentCancelPromiseArray = [],
             timeout = CONFIG.commentRequestTimeout,
             started = false;
-    
-    if(!angular.isNumber(timeout)) {
+
+    if (!angular.isNumber(timeout)) {
         timeout = 15000;
     }
-    
+
     var updateCancelPromise = function (channel, newPromise) {
         $log.debug("Updating cancel promise. [channel=" + channel + ";newPromise=" + newPromise + "]");
         if (commentCancelPromiseArray[channel]) {
@@ -36,9 +35,9 @@ $btmod
             delete commentCancelPromiseArray[channel];
         }
     };
-    
-    $rootScope.$on('PushEvent.CommentRequest', function(event, roomNo, channel) {
-        if(started) {
+
+    $rootScope.$on('PushEvent.CommentRequest', function (event, roomNo, channel) {
+        if (started) {
             $log.debug("CommentRequest intercepted. Creating new timeout.");
             var promise = $timeout(function () {
                 $log.debug("Broadcasting CommentRequestCancel event. [room=" + roomNo + ";channel=" + channel + "]");
@@ -47,22 +46,22 @@ $btmod
             updateCancelPromise(channel, promise);
         }
     });
-    
-    $rootScope.$on('PushEvent.CommentRequestCancel', function(event, roomNo, channel) {
-        if(started) {
+
+    $rootScope.$on('PushEvent.CommentRequestCancel', function (event, roomNo, channel) {
+        if (started) {
             $log.debug("CommentRequestCancel intercepted. Cancelleing any related timeouts.");
             updateCancelPromise(channel);
         }
-        
+
     });
-    
+
     return {
-        start: function() {
+        start: function () {
             started = true;
         },
-        stop: function() {
+        stop: function () {
             started = false;
         }
     };
-    
+
 });

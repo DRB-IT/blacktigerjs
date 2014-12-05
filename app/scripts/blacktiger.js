@@ -7,9 +7,8 @@
  * # blacktigerjsApp
  *
  */
-var $btmod = angular
-  .module('blacktigerjsApp', [
+var $btmod = angular.module('blacktigerjsApp', [
     'ngCookies',
     'ngResource',
     'LocalStorageModule'
-  ]);
+]);

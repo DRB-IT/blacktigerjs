@@ -21,76 +21,75 @@
  * applying authorization header as a default header for all subsequent requests, setting user at $rootScope.currentUser
  * and finally broadcasting 'login' with the user as a parameter.
  */
-$btmod
-        .factory('LoginSvc', function ($q, localStorageService, $http, $rootScope, blacktiger, $log) {
-            var currentUser = null;
-            return {
-                authenticate: function (username, password, remember) {
+$btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope, blacktiger, $log) {
+    var currentUser = null;
+    return {
+        authenticate: function (username, password, remember) {
 
-                    var user = null,
-                            authHeader, token;
+            var user = null,
+                    authHeader, token;
 
-                    if (!username && !password) {
-                        token = localStorageService.get('LoginToken');
-                    } else if (username && password) {
-                        token = btoa(username + ':' + password);
+            if (!username && !password) {
+                token = localStorageService.get('LoginToken');
+            } else if (username && password) {
+                token = btoa(username + ':' + password);
+            }
+
+            if (token) {
+                authHeader = 'Basic ' + token;
+                return $http.get(blacktiger.getServiceUrl() + "system/authenticate", {
+                    headers: {
+                        'Authorization': authHeader
                     }
-
-                    if (token) {
-                        authHeader = 'Basic ' + token;
-                        return $http.get(blacktiger.getServiceUrl() + "system/authenticate", {
-                            headers: {
-                                'Authorization': authHeader
-                            }
-                        }).then(function (response) {
-                            if (response.status !== 200) {
-                                var reason = response.status == 404 ? null : response.data;
-                                if (!reason || '' === reason) {
-                                    reason = {
-                                        message: 'Unable to communicate with server'
-                                    };
-                                }
-                                localStorageService.remove('LoginToken');
-                                console.info('Unable to authenticate: ' + reason.message);
-                                return $q.reject('Unable to authenticate. Reason: ' + reason.message);
-                            }
-
-                            if (remember) {
-                                localStorageService.add('LoginToken', token);
-                            }
-
-                            $rootScope.credentials = {
-                                username: username,
-                                password: password
+                }).then(function (response) {
+                    if (response.status !== 200) {
+                        var reason = response.status == 404 ? null : response.data;
+                        if (!reason || '' === reason) {
+                            reason = {
+                                message: 'Unable to communicate with server'
                             };
-                            user = response.data;
-
-                            $log.info('Authenticatated. Returning user.');
-                            $http.defaults.headers.common.Authorization = authHeader;
-
-                            $log.info('Logged in as ' + user.username);
-                            currentUser = user;
-                            $rootScope.currentUser = user;
-                            $rootScope.$broadcast("login", user);
-                            return user;
-                        });
-                    } else {
-                        console.info('Unable to authenticate.');
-                        return $q.reject('No credentials specified or available for authentication.');
+                        }
+                        localStorageService.remove('LoginToken');
+                        console.info('Unable to authenticate: ' + reason.message);
+                        return $q.reject('Unable to authenticate. Reason: ' + reason.message);
                     }
 
-                },
-                getCurrentUser: function () {
-                    return currentUser;
-                },
-                deauthenticate: function () {
-                    $http.defaults.headers.common.Authorization = undefined;
-                    localStorageService.remove('LoginToken');
-                    $rootScope.$broadcast("logout", currentUser);
-                    currentUser = null;
-                    $rootScope.currentUser = null;
-                    $rootScope.$broadcast("afterLogout", currentUser);
+                    if (remember) {
+                        localStorageService.add('LoginToken', token);
+                    }
 
-                }
-            };
-        });
+                    $rootScope.credentials = {
+                        username: username,
+                        password: password
+                    };
+                    user = response.data;
+
+                    $log.info('Authenticatated. Returning user.');
+                    $http.defaults.headers.common.Authorization = authHeader;
+
+                    $log.info('Logged in as ' + user.username);
+                    currentUser = user;
+                    $rootScope.currentUser = user;
+                    $rootScope.$broadcast("login", user);
+                    return user;
+                });
+            } else {
+                console.info('Unable to authenticate.');
+                return $q.reject('No credentials specified or available for authentication.');
+            }
+
+        },
+        getCurrentUser: function () {
+            return currentUser;
+        },
+        deauthenticate: function () {
+            $http.defaults.headers.common.Authorization = undefined;
+            localStorageService.remove('LoginToken');
+            $rootScope.$broadcast("logout", currentUser);
+            currentUser = null;
+            $rootScope.currentUser = null;
+            $rootScope.$broadcast("afterLogout", currentUser);
+
+        }
+    };
+});
