@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   // Configurable paths for the application
   var appConfig = {
-    app: require('./bower.json').appPath || 'app',
+    app: require('./bower.json').appPath || 'src',
     dist: 'dist'
   };
 
@@ -15,6 +15,15 @@ module.exports = function (grunt) {
 
     // Project settings
     yeoman: appConfig,
+    
+    jsdoc : {
+        dist : {
+            src: ['<%= yeoman.app %>/{,*/}*.js', 'test/**/*.js'], 
+            options: {
+                destination: 'doc'
+            }
+        }
+    },
 
     // Watches files for changes and runs tasks based on the changed files
     watch: {
@@ -23,7 +32,7 @@ module.exports = function (grunt) {
         tasks: ['wiredep']
       },
       js: {
-        files: ['<%= yeoman.app %>/scripts/{,*/}*.js'],
+        files: ['<%= yeoman.app %>/{,*/}*.js'],
         tasks: ['newer:jshint:all'],
         options: {
           livereload: '<%= connect.options.livereload %>'
@@ -104,7 +113,7 @@ module.exports = function (grunt) {
       all: {
         src: [
           'Gruntfile.js',
-          '<%= yeoman.app %>/scripts/{,*/}*.js'
+          '<%= yeoman.app %>/{,*/}*.js'
         ]
       },
       test: {
@@ -142,7 +151,7 @@ module.exports = function (grunt) {
      concat: {
        dist: {
            src: [
-            '<%= yeoman.app %>/scripts/{,*/}*.js'
+            '<%= yeoman.app %>/{,*/}*.js'
             ],
             
         dest: '<%= yeoman.dist %>/blacktiger.js'
@@ -172,7 +181,7 @@ module.exports = function (grunt) {
 
 
   
-
+  grunt.loadNpmTasks('grunt-jsdoc');
   grunt.registerTask('test', [
     'clean:server',
     //'concurrent:test',
@@ -191,6 +200,7 @@ module.exports = function (grunt) {
   grunt.registerTask('default', [
     'newer:jshint',
     'test',
+    //'jsdoc',
     'build'
   ]);
 };
