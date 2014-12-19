@@ -1,4 +1,4 @@
-/*exported $btmod */
+    /*exported $btmod */
 'use strict';
 
 /**
