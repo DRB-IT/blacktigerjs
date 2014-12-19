@@ -34,5 +34,21 @@ describe('Unit testing AutoCommentRequestCancelSvc', function () {
         expect(cancelReceived).toBe(true);
 
     });
+    
+    it('emits a CommentRequestCancelEvent after MuteEvent if Comment has recently been requested', function () {
+        var room = 'H45-0000';
+        var channel = 'SIP___1234';
+        var cancelReceived = false;
+
+        $rootScope.$on('PushEvent.CommentRequestCancel', function () {
+            cancelReceived = true;
+        });
+
+        $rootScope.$broadcast('PushEvent.CommentRequest', room, channel);
+        $rootScope.$broadcast('PushEvent.Mute', room, channel);
+
+        expect(cancelReceived).toBe(true);
+
+    });
 
 });

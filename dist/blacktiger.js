@@ -1,4 +1,4 @@
-/*exported $btmod */
+    /*exported $btmod */
 'use strict';
 
 /**
@@ -85,7 +85,7 @@ $btmod.factory('AutoCommentRequestCancelSvc', ["$rootScope", "$timeout", "CONFIG
     if (!angular.isNumber(timeout)) {
         timeout = 15000;
     }
-
+    
     var updateCancelPromise = function (channel, newPromise) {
         $log.debug('Updating cancel promise. [channel=' + channel + ';newPromise=' + newPromise + ']');
         if (commentCancelPromiseArray[channel]) {
@@ -111,10 +111,19 @@ $btmod.factory('AutoCommentRequestCancelSvc', ["$rootScope", "$timeout", "CONFIG
 
     $rootScope.$on('PushEvent.CommentRequestCancel', function (event, roomNo, channel) {
         if (started) {
-            $log.debug('CommentRequestCancel intercepted. Cancelleing any related timeouts.');
-            updateCancelPromise(channel);
+            $log.debug('Cancel intercepted. Creating new timeout.');
+            var promise = $timeout(function () {
+                $log.debug('Broadcasting CommentRequestCancel event. [room=' + roomNo + ';channel=' + channel + ']');
+                $rootScope.$broadcast('PushEvent.CommentRequestCancel', roomNo, channel);
+            }, timeout);
+            updateCancelPromise(channel, promise);
         }
-
+    });
+    
+    $rootScope.$on('PushEvent.Mute', function (event, roomNo, channel) {
+        if (commentCancelPromiseArray[channel]) {
+            $rootScope.$broadcast('PushEvent.CommentRequestCancel', roomNo, channel);
+        }
     });
 
     return {
