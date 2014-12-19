@@ -5,7 +5,7 @@ describe('Unit testing AutoCommentRequestCancelSvc', function () {
     var $timeout;
     var timeout = 100;
 
-    beforeEach(module('blacktiger-service', function ($provide) {
+    beforeEach(module('blacktiger', function ($provide) {
         $provide.value('CONFIG', {
             commentRequestTimeout: timeout
         });

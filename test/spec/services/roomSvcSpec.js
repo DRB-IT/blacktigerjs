@@ -4,7 +4,7 @@ describe('Unit testing RoomSvc', function() {
     var $httpBackend;
     var blacktiger;
 
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
 
     beforeEach(inject(function(_RoomSvc_, _$httpBackend_, _blacktiger_){
         RoomSvc = _RoomSvc_;

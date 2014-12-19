@@ -6,7 +6,7 @@ describe('Unit testing SystemSvc', function () {
     var $httpBackend;
     var info = null;
 
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
 
     beforeEach(inject(function (_$rootScope_, _$httpBackend_, _SystemSvc_, _blacktiger_) {
         $rootScope = _$rootScope_;

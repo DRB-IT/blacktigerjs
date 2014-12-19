@@ -3,7 +3,7 @@
 describe('Unit testing HistorySvc', function () {
     var historySvc, $rootScope, $log;
 
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
 
     beforeEach(module(function ($logProvider) {
         $logProvider.debugEnabled = true;

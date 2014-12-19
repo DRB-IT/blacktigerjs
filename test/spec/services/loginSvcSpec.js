@@ -7,7 +7,7 @@ describe('Unit testing LoginSvc', function() {
     var $cookieStore;
     var blacktiger;
 
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
 
     beforeEach(inject(function(_$compile_, _$rootScope_, _LoginSvc_, _$httpBackend_, _$cookieStore_, _blacktiger_){
         $compile = _$compile_;

@@ -7,7 +7,7 @@ describe('Unit testing ParticipantSvc', function() {
     var $timeout;
     var blacktiger;
 
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
 
     beforeEach(inject(function(_$rootScope_, _$httpBackend_, _ParticipantSvc_, _RoomSvc_, _$timeout_, _blacktiger_){
         $rootScope = _$rootScope_;

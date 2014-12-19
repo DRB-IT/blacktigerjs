@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
     // Configurable paths for the application
     var appConfig = {
-        app: require('./bower.json').appPath || 'app',
+        app: require('./bower.json').appPath || 'src',
         dist: 'dist'
     };
 
@@ -16,11 +16,11 @@ module.exports = function (grunt) {
         yeoman: appConfig,
         jsdoc: {
             dist: {
-                src: ['app/scripts/blacktiger.js','app/scripts/*/*.js'],
+                src: ['<%= yeoman.app %>/scripts/blacktiger.js','<%= yeoman.app %>/scripts/*/*.js'],
                 options: {
                     destination: 'doc',
-                    template: "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template",
-                    configure: "jsdoc.conf.json"
+                    template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template',
+                    configure: 'jsdoc.conf.json'
                 }
             }
         },
@@ -31,7 +31,7 @@ module.exports = function (grunt) {
                 tasks: ['wiredep']
             },
             js: {
-                files: ['<%= yeoman.app %>/{,*/}*.js'],
+                files: ['<%= yeoman.app %>/scripts/{,*/}*.js'],
                 tasks: ['newer:jshint:all'],
                 options: {
                     livereload: '<%= connect.options.livereload %>'
@@ -146,7 +146,7 @@ module.exports = function (grunt) {
         concat: {
             dist: {
                 src: [
-                    '<%= yeoman.app %>/{,*/}*.js'
+                    '<%= yeoman.app %>/scripts/{,*/}*.js'
                 ],
                 dest: '<%= yeoman.dist %>/blacktiger.js'
             }

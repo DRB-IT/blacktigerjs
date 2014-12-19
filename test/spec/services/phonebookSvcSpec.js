@@ -2,7 +2,7 @@
 describe('Unit testing PhoneBookSvc', function() {
     var PhoneBookSvc, $httpBackend, blacktiger, $rootScope;
     
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
     beforeEach(module(function($logProvider) {
         $logProvider.debugEnabled = true;
     }));

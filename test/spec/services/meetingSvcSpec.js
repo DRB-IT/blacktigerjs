@@ -3,7 +3,7 @@ describe('Unit testing MeetingSvc', function() {
     var $rootScope;
     var meetingSvc;
     
-    beforeEach(module('blacktiger-service'));
+    beforeEach(module('blacktiger'));
     
     beforeEach(inject(function(_$rootScope_, _MeetingSvc_){
         $rootScope = _$rootScope_;
