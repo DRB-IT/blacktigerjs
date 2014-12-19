@@ -241,6 +241,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         } else {
             entry = entries[key];
             entry.channel = participant.channel;
+            entry.name = participant.name;
         }
 
         if (resume && entry.calls.length > 0) {
@@ -290,6 +291,10 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         }
     };
 
+    var handleChangeEvent = function(event, roomNo, participant) {
+        handlePhoneBookUpdate(event, participant.phoneNumber, participant.name);
+    };
+    
     var handlePhoneBookUpdate = function (event, number, name) {
         $log.debug('HistorySvc:handlePhoneBookUpdate');
         angular.forEach(history, function (entries) {
@@ -349,6 +354,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
     $rootScope.$on('PushEvent.ConferenceStart', handleConferenceStartEvent);
     $rootScope.$on('PushEvent.Join', handleJoinEvent);
     $rootScope.$on('PushEvent.Leave', handleLeaveEvent);
+    $rootScope.$on('PushEvent.Change', handleChangeEvent);
     $rootScope.$on('PhoneBook.Update', handlePhoneBookUpdate);
 
     return {
