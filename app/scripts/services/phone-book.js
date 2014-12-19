@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:PhoneBookSvc
+ * @memberOf! blacktiger#
+ * @name PhoneBookSvc
  * @description
- * # PhoneBookSvc
+ * 
  * Service for updating names related to a phone number.
  */
 $btmod.factory('PhoneBookSvc', function ($http, blacktiger, $rootScope) {

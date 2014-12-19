@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:RoomSvc
+ * @memberOf! blacktiger#
+ * @name RoomSvc
  * @description
- * # RoomSvc
+ * 
  * Service for retreiving the rooms the current user has access to.
  */
 $btmod.factory('RoomSvc', function (blacktiger, $resource) {

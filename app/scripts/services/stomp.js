@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:StompSvc
+ * @memberOf! blacktiger#
+ * @name StompSvc
  * @description
- * # StompSvc
+ * 
  * Service for communicating with the server over the Stomp protocol.
  * See http://jmesnil.net/stomp-websocket/doc/ for more info.
  */

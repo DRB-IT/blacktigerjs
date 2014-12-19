@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:SipUserSvc
+ * @memberOf! blacktiger#
+ * @name SipUserSvc
  * @description
- * # SipUserSvc
+ * 
  * Service for working with SIP user information.
  */
 $btmod.factory('SipUserSvc', function ($http, blacktiger, $rootScope, $q) {

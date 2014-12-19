@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:AutoCommentRequestCancelSvc
+ * @memberOf! blacktiger#
+ * @name AutoCommentRequestCancelSvc
  * @description
- * # AutoCommentRequestCancelSvc
+ * 
  * Service for automatically broadcasting CommentRequestCancel events when needed.
  * 
  * When a 'PushEvent.CommentRequest' is triggered we want to make sure that a 'PushEvent.CommentRequestCancel' 

@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:ParticipantSvc
+ * @memberOf! blacktiger#
+ * @name ParticipantSvc
  * @description
- * # ParticipantSvc
+ * 
  * Service for retreiving participants currently in a room.
  */
 $btmod.factory('ParticipantSvc', function (blacktiger, $resource, $log, $http) {

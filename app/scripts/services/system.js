@@ -2,10 +2,10 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name blacktigerjs.service:SystemSvc
+ * @memberOf! blacktiger#
+ * @name SystemSvc
  * @description
- * # SystemSvc
+ * 
  * Service for retreiving information about the system.
  * 
  * This service exposes one method: 'getSystemInfo'.
