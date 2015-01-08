@@ -29,7 +29,7 @@ describe('Unit testing HistorySvc', function () {
             phoneNumber: '4522334455',
             name: 'John Doe',
             channel: 'SIP__1234',
-            dateJoined: new Date(1420723846)
+            dateJoined: 1420723846
         };
         $log.debug('Broadcasting PushEvent.Join');
         $rootScope.$broadcast('PushEvent.Join', room, participant);
