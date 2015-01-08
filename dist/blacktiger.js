@@ -431,7 +431,7 @@ $btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", 
             if (!username && !password) {
                 token = localStorageService.get('LoginToken');
             } else if (username && password) {
-                token = btoa(username + ':' + password);
+                token = btoa(username.trim() + ':' + password.trim());
             }
 
             if (token) {
