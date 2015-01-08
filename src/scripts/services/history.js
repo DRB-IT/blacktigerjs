@@ -68,7 +68,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
 
     var handleJoinEvent = function (event, roomNo, participant, resume) {
         $log.debug('HistorySvc:handleJoinEvent');
-        var entries, entry, call, key;
+        var entries, entry, call, key, timestamp = participant.dateJoined ? participant.dateJoined.getTime() : new Date().getTime();
 
         //Ignore the host. It will not be part of the history.
         if (participant.host) {
@@ -93,7 +93,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
                 callerId: participant.callerId,
                 phoneNumber: participant.phoneNumber,
                 name: participant.name,
-                firstCall: participant.dateJoined ? participant.dateJoined.getTime() : new Date().getTime(),
+                firstCall: timestamp,
                 calls: [],
                 channel: participant.channel,
                 totalDuration: 0
@@ -111,7 +111,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
         } else {
             $log.debug('Appending new call to call list for participant.');
             call = {
-                start: new Date().getTime(),
+                start: timestamp,
                 end: null
             };
             entry.calls.push(call);
