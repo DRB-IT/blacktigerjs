@@ -93,7 +93,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
                 callerId: participant.callerId,
                 phoneNumber: participant.phoneNumber,
                 name: participant.name,
-                firstCall: new Date().getTime(),
+                firstCall: participant.dateJoined ? participant.dateJoined.getTime() : new Date().getTime(),
                 calls: [],
                 channel: participant.channel,
                 totalDuration: 0

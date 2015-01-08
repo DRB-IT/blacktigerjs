@@ -28,13 +28,15 @@ describe('Unit testing HistorySvc', function () {
             callerId: 'L00000000',
             phoneNumber: '4522334455',
             name: 'John Doe',
-            channel: 'SIP__1234'
+            channel: 'SIP__1234',
+            dateJoined: new Date(1420723846)
         };
         $log.debug('Broadcasting PushEvent.Join');
         $rootScope.$broadcast('PushEvent.Join', room, participant);
         var entries = historySvc.findAllByRoom(room);
         expect(entries.length).toEqual(1);
         expect(entries[0].name).toEqual('John Doe');
+        expect(entries[0].firstCall).toEqual(1420723846);
         expect(historySvc.findAllByRoom('NOROOM').length).toEqual(0);
         expect(historySvc.findAll().length).toEqual(1);
     });
