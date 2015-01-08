@@ -4,10 +4,13 @@
   "version": "0.1.8",
   "ignore": [
     "bower_components/**",
-    "nbprojects/**",
+    "nbproject/**",
     "node_modules/**",
     "src/**",
-    "test/**"
+    "test/**",
+    ".*",
+    "Gruntfile.js",
+    "jsdoc.conf.json"
   ],
   "dependencies": {
     "angular": "^1.3.0",
