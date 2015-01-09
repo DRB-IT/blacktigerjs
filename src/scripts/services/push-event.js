@@ -88,9 +88,8 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
                 connected = false;
             } else {
                 $rootScope.$broadcast('PushEventSvc.Cannot_Connect', error);
+                deferred.reject(error);
             }
-            
-            deferred.reject(error);
         }, '/');
         return deferred.promise;
     };
