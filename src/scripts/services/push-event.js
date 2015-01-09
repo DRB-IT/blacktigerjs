@@ -55,9 +55,10 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
 
     var initializeSocket = function () {
         var deferred = $q.defer();
+        var connected = false;
         stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
         stompClient.connect(null, null, function () {
-            //+ currentRoom
+            connected = true;
             RoomSvc.query('full').$promise.then(function (result) {
                 var rooms = [];
                 angular.forEach(result, function (room) {
@@ -82,7 +83,13 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
             });
 
         }, function (error) {
-            $rootScope.$broadcast('PushEventSvc.Lost_Connection', error);
+            if(connected) {
+                $rootScope.$broadcast('PushEventSvc.Lost_Connection', error);
+                connected = false;
+            } else {
+                $rootScope.$broadcast('PushEventSvc.Cannot_Connect', error);
+            }
+            
             deferred.reject(error);
         }, '/');
         return deferred.promise;
