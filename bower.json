@@ -1,7 +1,7 @@
 {
   "name": "blacktigerjs",
   "main": "dist/blacktiger.js",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "ignore": [
     "bower_components/**",
     "nbproject/**",
