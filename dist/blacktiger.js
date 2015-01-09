@@ -874,7 +874,6 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "blacktiger
                 $rootScope.$broadcast('PushEventSvc.Lost_Connection', error);
                 connected = false;
             } else {
-                $rootScope.$broadcast('PushEventSvc.Cannot_Connect', error);
                 deferred.reject(error);
             }
         }, '/');
