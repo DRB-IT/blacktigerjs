@@ -254,7 +254,7 @@ describe('Unit testing MeetingSvc', function() {
         expect(2).toEqual(meetingSvc.getTotalParticipants());
         
         
-        $rootScope.$broadcast('PushEvent.Initializing');
+        $rootScope.$broadcast('PushEventSvc.Initializing');
         expect(0).toEqual(meetingSvc.getTotalParticipants());
         
         $rootScope.$broadcast('PushEvent.ConferenceStart', angular.copy(room));
