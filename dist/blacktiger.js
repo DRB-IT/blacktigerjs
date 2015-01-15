@@ -544,6 +544,10 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
         }
         return count;
     };
+    
+    var handleInitializing = function() {
+        rooms = [];
+    };
 
     var handleConfStart = function (event, room) {
         var existingRoom = getRoomById(room.id);
@@ -655,6 +659,7 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
 
     };
 
+    $rootScope.$on('PushEvent.Initializing', handleInitializing);
     $rootScope.$on('PushEvent.ConferenceStart', handleConfStart);
     $rootScope.$on('PushEvent.ConferenceEnd', handleConfEnd);
     $rootScope.$on('PushEvent.Join', handleJoin);
@@ -841,6 +846,7 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "blacktiger
     };
 
     var initializeSocket = function () {
+        $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
         var connected = false;
         stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
