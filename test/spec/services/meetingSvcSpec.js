@@ -215,6 +215,52 @@ describe('Unit testing MeetingSvc', function() {
         $rootScope.$broadcast('PhoneBook.Update', participant.phoneNumber, 'Jane Doe');
         expect(meetingSvc.findRoom(room.id).participants[0].name).toEqual('Jane Doe');
     });
+    
+    it('purges data on initializing PushEventSvc', function () {
+        var room = {
+            id: 'H45-0000'
+        };
+        
+        var host = {
+            type: 'Sip',
+            callerId: 'L00000000',
+            phoneNumber: '4522334451',
+            name: 'John Doe',
+            channel: 'SIP__1231',
+            host:true
+        };
+        var participant1 = {
+            type: 'Sip',
+            callerId: 'L00000001',
+            phoneNumber: '4522334452',
+            name: 'John Doe',
+            channel: 'SIP__1232',
+            host:false
+        };
+        var participant2 = {
+            type: 'Phone',
+            callerId: 'L00000002',
+            phoneNumber: '4522334453',
+            name: 'John Doe',
+            channel: 'SIP__1233',
+            host:false
+        };
+        
+        $rootScope.$broadcast('PushEvent.Initializing');
+        $rootScope.$broadcast('PushEvent.ConferenceStart', angular.copy(room));
+        $rootScope.$broadcast('PushEvent.Join', room.id, participant1);
+        $rootScope.$broadcast('PushEvent.Join', room.id, host);
+        $rootScope.$broadcast('PushEvent.Join', room.id, participant2);
+        expect(2).toEqual(meetingSvc.getTotalParticipants());
+        
+        
+        $rootScope.$broadcast('PushEvent.Initializing');
+        expect(0).toEqual(meetingSvc.getTotalParticipants());
+        
+        $rootScope.$broadcast('PushEvent.ConferenceStart', angular.copy(room));
+        $rootScope.$broadcast('PushEvent.Join', room.id, participant1);
+        expect(1).toEqual(meetingSvc.getTotalParticipants());
+    });
    
 });
 

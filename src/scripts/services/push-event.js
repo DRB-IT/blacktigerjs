@@ -54,6 +54,7 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
     };
 
     var initializeSocket = function () {
+        $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
         var connected = false;
         stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line

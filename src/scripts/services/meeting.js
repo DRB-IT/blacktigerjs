@@ -49,6 +49,10 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
         }
         return count;
     };
+    
+    var handleInitializing = function() {
+        rooms = [];
+    };
 
     var handleConfStart = function (event, room) {
         var existingRoom = getRoomById(room.id);
@@ -160,6 +164,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
 
     };
 
+    $rootScope.$on('PushEvent.Initializing', handleInitializing);
     $rootScope.$on('PushEvent.ConferenceStart', handleConfStart);
     $rootScope.$on('PushEvent.ConferenceEnd', handleConfEnd);
     $rootScope.$on('PushEvent.Join', handleJoin);
