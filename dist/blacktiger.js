@@ -658,8 +658,8 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
         });
 
     };
-
-    $rootScope.$on('PushEvent.Initializing', handleInitializing);
+                    
+    $rootScope.$on('PushEventSvc.Initializing', handleInitializing);
     $rootScope.$on('PushEvent.ConferenceStart', handleConfStart);
     $rootScope.$on('PushEvent.ConferenceEnd', handleConfEnd);
     $rootScope.$on('PushEvent.Join', handleJoin);
