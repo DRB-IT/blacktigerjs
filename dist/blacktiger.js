@@ -17,6 +17,10 @@ var $btmod = angular.module('blacktiger', [
     'LocalStorageModule'
 ]);
 
+$btmod.config(["$httpProvider", function($httpProvider) {
+    $httpProvider.interceptors.push('AuthorizationHeaderSvc');
+}]);
+
 /*global $btmod*/
 'use strict';
 
@@ -64,27 +68,28 @@ $btmod.provider('blacktiger', function () {
 
 /**
  * @memberOf! blacktiger#
- * @name SystemSvc
+ * @name AuthorizationHeaderSvc
  * @description
  * 
- * Service for retreiving information about the system.
+ * Service for applying Authorization Header to all requests to the serviceUrl
  * 
- * This service exposes one method: 'getSystemInfo'.
- * getSystemInfo returns a promise that, when it is susccessfull, will hold an object with information about the system.
- * It will be retreived by requesting <serviceurl>/system/information.
+ * Exposes setToken(<token>). If token has not been set, the header is not applied.
  */
-$btmod.factory('SystemSvc', ["$http", "blacktiger", function ($http, blacktiger) {
+$btmod.factory('AuthorizationHeaderSvc', ["blacktiger", function (blacktiger) {
+    var token = undefined;
     return {
-        getSystemInfo: function () {
-            return $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
-                return data;
-            }).error(function(data) {
-                return data;
-            });
+        setToken: function(newToken) {
+            token = newToken;
+        },
+        'request': function(config) {
+            if(angular.isDefined(token) && config.url.substr(0, blacktiger.getServiceUrl().length) === blacktiger.getServiceUrl()) {
+                config.headers = config.headers || {};
+                config.headers.Authorization = token;
+            }
+            return config;
         }
     };
 }]);
-
 /*global $btmod*/
 'use strict';
 
@@ -1079,25 +1084,24 @@ $btmod.factory('StompSvc', ["$rootScope", function ($rootScope) {
 
 /**
  * @memberOf! blacktiger#
- * @name AuthorizationHeaderSvc
+ * @name SystemSvc
  * @description
  * 
- * Service for applying Authorization Header to all requests to the serviceUrl
+ * Service for retreiving information about the system.
  * 
- * Exposes setToken(<token>). If token has not been set, the header is not applied.
+ * This service exposes one method: 'getSystemInfo'.
+ * getSystemInfo returns a promise that, when it is susccessfull, will hold an object with information about the system.
+ * It will be retreived by requesting <serviceurl>/system/information.
  */
-$btmod.factory('AuthorizationHeaderSvc', ["blacktiger", function (blacktiger) {
-    var token = undefined;
+$btmod.factory('SystemSvc', ["$http", "blacktiger", function ($http, blacktiger) {
     return {
-        setToken: function(newToken) {
-            token = newToken;
-        },
-        'request': function(config) {
-            if(angular.isDefined(token) && config.url.substr(0, blacktiger.getServiceUrl().length) === blacktiger.getServiceUrl()) {
-                config.headers = config.headers || {};
-                config.headers.Authorization = token;
-            }
-            return config;
+        getSystemInfo: function () {
+            return $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
+                return data;
+            }).error(function(data) {
+                return data;
+            });
         }
     };
 }]);
+
