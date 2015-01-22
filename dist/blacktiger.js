@@ -64,6 +64,32 @@ $btmod.provider('blacktiger', function () {
 
 /**
  * @memberOf! blacktiger#
+ * @name SystemSvc
+ * @description
+ * 
+ * Service for retreiving information about the system.
+ * 
+ * This service exposes one method: 'getSystemInfo'.
+ * getSystemInfo returns a promise that, when it is susccessfull, will hold an object with information about the system.
+ * It will be retreived by requesting <serviceurl>/system/information.
+ */
+$btmod.factory('SystemSvc', ["$http", "blacktiger", function ($http, blacktiger) {
+    return {
+        getSystemInfo: function () {
+            return $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
+                return data;
+            }).error(function(data) {
+                return data;
+            });
+        }
+    };
+}]);
+
+/*global $btmod*/
+'use strict';
+
+/**
+ * @memberOf! blacktiger#
  * @name AutoCommentRequestCancelSvc
  * @description
  * 
@@ -420,7 +446,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
  * applying authorization header as a default header for all subsequent requests, setting user at $rootScope.currentUser
  * and finally broadcasting 'login' with the user as a parameter.
  */
-$btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", "blacktiger", "$log", function ($q, localStorageService, $http, $rootScope, blacktiger, $log) {
+$btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", "blacktiger", "$log", "AuthorizationHeaderSvc", function ($q, localStorageService, $http, $rootScope, blacktiger, $log, AuthorizationHeaderSvc) {
     var currentUser = null;
     return {
         authenticate: function (username, password, remember) {
@@ -449,7 +475,7 @@ $btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", 
                             };
                         }
                         localStorageService.remove('LoginToken');
-                        console.info('Unable to authenticate: ' + reason.message);
+                        $log.info('Unable to authenticate: ' + reason.message);
                         return $q.reject('Unable to authenticate. Reason: ' + reason.message);
                     }
 
@@ -462,10 +488,10 @@ $btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", 
                         password: password
                     };
                     user = response.data;
-
+                    
                     $log.info('Authenticatated. Returning user.');
-                    $http.defaults.headers.common.Authorization = authHeader;
-
+                    AuthorizationHeaderSvc.setToken(authHeader);
+                    
                     $log.info('Logged in as ' + user.username);
                     currentUser = user;
                     $rootScope.currentUser = user;
@@ -473,7 +499,7 @@ $btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", 
                     return user;
                 });
             } else {
-                console.info('Unable to authenticate.');
+                $log.info('Unable to authenticate.');
                 return $q.reject('No credentials specified or available for authentication.');
             }
 
@@ -482,7 +508,7 @@ $btmod.factory('LoginSvc', ["$q", "localStorageService", "$http", "$rootScope", 
             return currentUser;
         },
         deauthenticate: function () {
-            $http.defaults.headers.common.Authorization = undefined;
+            AuthorizationHeaderSvc.setToken(undefined);
             localStorageService.remove('LoginToken');
             $rootScope.$broadcast('logout', currentUser);
             currentUser = null;
@@ -1053,23 +1079,25 @@ $btmod.factory('StompSvc', ["$rootScope", function ($rootScope) {
 
 /**
  * @memberOf! blacktiger#
- * @name SystemSvc
+ * @name AuthorizationHeaderSvc
  * @description
  * 
- * Service for retreiving information about the system.
+ * Service for applying Authorization Header to all requests to the serviceUrl
  * 
- * This service exposes one method: 'getSystemInfo'.
- * getSystemInfo returns a promise that, when it is susccessfull, will hold an object with information about the system.
- * It will be retreived by requesting <serviceurl>/system/information.
+ * Exposes setToken(<token>). If token has not been set, the header is not applied.
  */
-$btmod.factory('SystemSvc', ["$http", "blacktiger", function ($http, blacktiger) {
+$btmod.factory('AuthorizationHeaderSvc', ["blacktiger", function (blacktiger) {
+    var token = undefined;
     return {
-        getSystemInfo: function () {
-            return $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
-                return data;
-            }).error(function(data) {
-                return data;
-            });
+        setToken: function(newToken) {
+            token = newToken;
+        },
+        'request': function(config) {
+            if(angular.isDefined(token) && config.url.substr(0, blacktiger.getServiceUrl().length) === blacktiger.getServiceUrl()) {
+                config.headers = config.headers || {};
+                config.headers.Authorization = token;
+            }
+            return config;
         }
     };
 }]);

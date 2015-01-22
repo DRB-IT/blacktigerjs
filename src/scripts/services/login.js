@@ -22,7 +22,7 @@
  * applying authorization header as a default header for all subsequent requests, setting user at $rootScope.currentUser
  * and finally broadcasting 'login' with the user as a parameter.
  */
-$btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope, blacktiger, $log) {
+$btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope, blacktiger, $log, AuthorizationHeaderSvc) {
     var currentUser = null;
     return {
         authenticate: function (username, password, remember) {
@@ -51,7 +51,7 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
                             };
                         }
                         localStorageService.remove('LoginToken');
-                        console.info('Unable to authenticate: ' + reason.message);
+                        $log.info('Unable to authenticate: ' + reason.message);
                         return $q.reject('Unable to authenticate. Reason: ' + reason.message);
                     }
 
@@ -64,10 +64,10 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
                         password: password
                     };
                     user = response.data;
-
+                    
                     $log.info('Authenticatated. Returning user.');
-                    $http.defaults.headers.common.Authorization = authHeader;
-
+                    AuthorizationHeaderSvc.setToken(authHeader);
+                    
                     $log.info('Logged in as ' + user.username);
                     currentUser = user;
                     $rootScope.currentUser = user;
@@ -75,7 +75,7 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
                     return user;
                 });
             } else {
-                console.info('Unable to authenticate.');
+                $log.info('Unable to authenticate.');
                 return $q.reject('No credentials specified or available for authentication.');
             }
 
@@ -84,7 +84,7 @@ $btmod.factory('LoginSvc', function ($q, localStorageService, $http, $rootScope,
             return currentUser;
         },
         deauthenticate: function () {
-            $http.defaults.headers.common.Authorization = undefined;
+            AuthorizationHeaderSvc.setToken(undefined);
             localStorageService.remove('LoginToken');
             $rootScope.$broadcast('logout', currentUser);
             currentUser = null;
