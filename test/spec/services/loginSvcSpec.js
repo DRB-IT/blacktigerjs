@@ -82,6 +82,52 @@ describe('Unit testing LoginSvc', function () {
 
     });
     
+    describe('also sends an authentication header on subsequent requests', function () {
+        var username = 'john', password = 'doe';
+        var user = null;
+        var requestOk = false;
+
+        beforeEach(function (done) {
+            
+            $httpBackend.expect('GET', blacktiger.getServiceUrl() + 'system/authenticate', undefined, function (headers) {
+                return headers.Authorization === 'Basic am9objpkb2U=';
+            }).respond({
+                username: 'john',
+                authtoken: 'qwerty',
+                roles: ['ROLE_USER']
+            });
+            
+            LoginSvc.authenticate(username, password).then(function (_user_) {
+                console.log('Got user after authentication.');
+                user = _user_;
+                
+            }, function (reason) {
+                console.log(reason);
+            });
+            $httpBackend.flush();
+            
+            $httpBackend.expect('GET', blacktiger.getServiceUrl() + 'system/authenticate2' , undefined, function (headers) {
+                return headers.Authorization === 'Basic am9objpkb2U=';
+            }).respond({
+                username: 'john',
+                authtoken: 'qwerty',
+                roles: ['ROLE_USER']
+            });
+            
+            
+            $http.get(blacktiger.getServiceUrl() + 'system/authenticate2').success(function() {
+                requestOk = true;
+                done();
+            });
+            $httpBackend.flush();
+        });
+
+        it('has user set', function () {
+            expect(user).not.toBe(null);
+            expect(requestOk).toBe(true);
+        });
+    });
+    
     describe('does not send an authentication request to another host', function () {
         var username = 'john', password = 'doe';
         var user = null;

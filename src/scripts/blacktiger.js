@@ -16,3 +16,7 @@ var $btmod = angular.module('blacktiger', [
     'ngResource',
     'LocalStorageModule'
 ]);
+
+$btmod.config(function($httpProvider) {
+    $httpProvider.interceptors.push('AuthorizationHeaderSvc');
+});
