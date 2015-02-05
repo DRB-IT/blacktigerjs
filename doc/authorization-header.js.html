@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>DocStrap Source: services/phone-book.js</title>
+	<title>DocStrap Source: services/authorization-header.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -48,7 +48,7 @@
 					
 
 
-		<h1 class="page-title">Source: services/phone-book.js</h1>
+		<h1 class="page-title">Source: services/authorization-header.js</h1>
     
 <section>
 	<article>
@@ -58,22 +58,28 @@
 
 /**
  * @memberOf! blacktiger#
- * @name PhoneBookSvc
+ * @name AuthorizationHeaderSvc
  * @description
  * 
- * Service for updating names related to a phone number.
+ * Service for applying Authorization Header to all requests to the serviceUrl
+ * 
+ * Exposes setToken(&lt;token>). If token has not been set, the header is not applied.
  */
-$btmod.factory('PhoneBookSvc', function ($http, blacktiger, $rootScope) {
+$btmod.factory('AuthorizationHeaderSvc', function (blacktiger) {
+    var token = undefined;
     return {
-        updateEntry: function (phoneNumber, name) {
-            return $http.put(blacktiger.getServiceUrl() + 'phonebook/' + phoneNumber, name).then(function () {
-                $rootScope.$broadcast('PhoneBook.Update', phoneNumber, name);
-                return;
-            });
+        setToken: function(newToken) {
+            token = newToken;
+        },
+        'request': function(config) {
+            if(angular.isDefined(token) && config.url.substr(0, blacktiger.getServiceUrl().length) === blacktiger.getServiceUrl()) {
+                config.headers = config.headers || {};
+                config.headers.Authorization = token;
+            }
+            return config;
         }
     };
-});
-</pre>
+});</pre>
 	</article>
 </section>
 

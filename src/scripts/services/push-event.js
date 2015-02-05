@@ -22,7 +22,7 @@
  * - 'Mute' will be broadcast as 'PushEvent.Mute' with roomNo and channel as parameter.
  * - 'Unmute' will be broadcast as 'PushEvent.Unmute' with roomNo and channel as parameter.
  */
-$btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktiger, $log, $q) {
+$btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, LoginSvc, blacktiger, $log, $q) {
     var stompClient;
 
     var handleEvent = function (event) {
@@ -56,6 +56,14 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
     var initializeSocket = function () {
         $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
+        
+        var user = LoginSvc.getCurrentUser();
+        
+        if(!user) {
+            deferred.reject("Not authenticated via LoginSvc yet.");
+            return deferred.promise;
+        }
+        
         var connected = false;
         stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
         stompClient.connect(null, null, function () {
@@ -67,18 +75,18 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, blacktig
                     $rootScope.$broadcast('PushEvent.ConferenceStart', room, true);
                 });
 
-                if (rooms.length === 1) {
-                    stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
-                        var e = angular.fromJson(message.body);
-                        handleEvent(e);
-                    });
-                } else if (rooms.length > 1) {
+                if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
                     stompClient.subscribe('/queue/events/*', function (message) {
                         var e = angular.fromJson(message.body);
                         handleEvent(e);
                     });
+                } else if (user.roles.indexOf('ROLE_HOST') >= 0 && rooms.length > 1) {
+                    stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
+                        var e = angular.fromJson(message.body);
+                        handleEvent(e);
+                    });
                 }
-
+                
                 $rootScope.$broadcast('PushEventSvc.Initialized');
                 deferred.resolve();
             });
