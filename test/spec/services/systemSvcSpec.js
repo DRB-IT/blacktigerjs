@@ -40,6 +40,7 @@ describe('Unit testing SystemSvc', function () {
 
         it('has info', function () {
             expect(info).not.toBe(null);
+            expect(info.cores).toBe(24);
         });
     });
 
