@@ -1101,14 +1101,16 @@ $btmod.factory('StompSvc', ["$rootScope", function ($rootScope) {
  * getSystemInfo returns a promise that, when it is susccessfull, will hold an object with information about the system.
  * It will be retreived by requesting <serviceurl>/system/information.
  */
-$btmod.factory('SystemSvc', ["$http", "blacktiger", function ($http, blacktiger) {
+$btmod.factory('SystemSvc', ["$http", "blacktiger", "$q", function ($http, blacktiger, $q) {
     return {
         getSystemInfo: function () {
-            return $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
-                return data;
+            var deferred = $q.defer();
+            $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
+                deferred.resolve(data);
             }).error(function(data) {
-                return data;
+                deferred.reject(data);
             });
+            return deferred.promise;
         }
     };
 }]);
