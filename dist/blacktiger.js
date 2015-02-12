@@ -903,7 +903,7 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
                         var e = angular.fromJson(message.body);
                         handleEvent(e);
                     });
-                } else if (user.roles.indexOf('ROLE_HOST') >= 0 && rooms.length > 1) {
+                } else if (user.roles.indexOf('ROLE_HOST') >= 0 && rooms.length >= 1) {
                     stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
                         var e = angular.fromJson(message.body);
                         handleEvent(e);
