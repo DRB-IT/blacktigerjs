@@ -23,20 +23,22 @@ describe('Unit testing HistorySvc', function () {
 
     it('adds participants to the correct room when a PushEvent.Join is broadcast.', function () {
         var room = 'H45-0000';
+        var timestamp = '2015-01-01T12:00:00Z';
+        var dateJoined = Date.parse(timestamp);
         var participant = {
             type: 'Sip',
             callerId: 'L00000000',
             phoneNumber: '4522334455',
             name: 'John Doe',
             channel: 'SIP__1234',
-            dateJoined: 1420723846
+            dateJoined: timestamp
         };
         $log.debug('Broadcasting PushEvent.Join');
         $rootScope.$broadcast('PushEvent.Join', room, participant);
         var entries = historySvc.findAllByRoom(room);
         expect(entries.length).toEqual(1);
         expect(entries[0].name).toEqual('John Doe');
-        expect(entries[0].firstCall).toEqual(1420723846);
+        expect(entries[0].firstCall).toEqual(dateJoined);
         expect(historySvc.findAllByRoom('NOROOM').length).toEqual(0);
         expect(historySvc.findAll().length).toEqual(1);
     });
