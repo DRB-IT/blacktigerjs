@@ -68,7 +68,11 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
 
     var handleJoinEvent = function (event, roomNo, participant, resume) {
         $log.debug('HistorySvc:handleJoinEvent');
-        var entries, entry, call, key, timestamp = participant.dateJoined ? new Date(participant.dateJoined).getTime() : new Date().getTime();
+        var entries, entry, call, key, timestamp = new Date().getTime();
+        
+        if(participant.millisSinceJoin) {
+            timestamp -= participant.millisSinceJoin;
+        }
 
         //Ignore the host. It will not be part of the history.
         if (participant.host) {
