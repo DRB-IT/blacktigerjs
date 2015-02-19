@@ -21,6 +21,11 @@ $btmod.config(["$httpProvider", function($httpProvider) {
     $httpProvider.interceptors.push('AuthorizationHeaderSvc');
 }]);
 
+$btmod.run(["HistorySvc", function(HistorySvc) {
+    // Dummy to make sure that HistorySvc is initialized from the beginning.
+    HistorySvc.getCookieName();
+}]);
+
 /*global $btmod*/
 'use strict';
 
