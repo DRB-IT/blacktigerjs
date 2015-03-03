@@ -130,7 +130,7 @@ describe('Unit testing HistorySvc', function () {
         expect(historySvc.findAllByActive(false).length).toEqual(0);
     });
 
-    it('can delete the history', function () {
+    it('can delete all history', function () {
         var room = 'H45-0000';
         var participant = {
             type: 'Sip',
@@ -145,6 +145,25 @@ describe('Unit testing HistorySvc', function () {
 
         historySvc.deleteAll();
         expect(historySvc.findAll().length).toEqual(0);
+    });
+    
+    it('can delete all history except active calls', function () {
+        var room = 'H45-0000';
+        var participant = {
+            type: 'Sip',
+            callerId: 'L00000000',
+            phoneNumber: '4522334455',
+            name: 'John Doe',
+            channel: 'SIP__1234'
+        };
+        $log.debug('Broadcasting PushEvent.Join');
+        $rootScope.$broadcast('PushEvent.Join', room, participant);
+        $rootScope.$broadcast('PushEvent.Leave', room, participant);
+        $rootScope.$broadcast('PushEvent.Join', room, participant);
+        expect(historySvc.findAll().length).toEqual(1); 
+
+        historySvc.deleteAll(true);
+        expect(historySvc.findAll().length).toEqual(1);
     });
 
     it('handles PhoneBook.Update events', function () {

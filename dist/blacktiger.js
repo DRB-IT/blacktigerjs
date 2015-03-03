@@ -210,15 +210,31 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         $rootScope.$broadcast('History.Updated');
     };
 
-    var resetHistory = function () {
-        $log.debug('Resetting history data');
-        history = {};
-        $cookieStore.put(historyCookieName, {});
+    var cleanHistory = function (keepActiveCalls) {
+        $log.debug('Resetting history data [keepActiveCalls=' + keepActiveCalls + ']');
+        if(keepActiveCalls) {
+            angular.forEach(history, function(room, key) {
+                angular.forEach(room, function(entry, key) {
+                    var i;
+                    alert(entry.calls);
+                    for(i=entry.calls.length-1;i>=0;i--) {
+                        alert(entry.calls[i]);
+                        if(entry.calls[i].end === null) {
+                            entry.calls.splice(i,1);
+                        }
+                    }
+                    alert(entry.calls);
+                });
+            });
+        } else {
+            history = {};
+        }
+        $cookieStore.put(historyCookieName, history);
         fireUpdated();
     };
 
     if (!history || !angular.isObject(history)) {
-        resetHistory();
+        cleanHistory(false);
     }
 
     var createRoomEntry = function (roomNo) {
@@ -415,8 +431,8 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
                 return entries[0];
             }
         },
-        deleteAll: function () {
-            resetHistory();
+        deleteAll: function (keepActiveCalls) {
+            cleanHistory(keepActiveCalls);
         },
         findAll: function () {
             return doFind();
