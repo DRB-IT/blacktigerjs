@@ -158,12 +158,14 @@ describe('Unit testing HistorySvc', function () {
         };
         $log.debug('Broadcasting PushEvent.Join');
         $rootScope.$broadcast('PushEvent.Join', room, participant);
-        $rootScope.$broadcast('PushEvent.Leave', room, participant);
+        $rootScope.$broadcast('PushEvent.Leave', room, participant.channel);
         $rootScope.$broadcast('PushEvent.Join', room, participant);
         expect(historySvc.findAll().length).toEqual(1); 
+        expect(historySvc.findAll()[0].calls.length).toEqual(2); 
 
         historySvc.deleteAll(true);
-        expect(historySvc.findAll().length).toEqual(1);
+        expect(historySvc.findAll().length).toEqual(1);        
+        expect(historySvc.findAll()[0].calls.length).toEqual(1); 
     });
 
     it('handles PhoneBook.Update events', function () {

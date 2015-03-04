@@ -41,14 +41,13 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
             angular.forEach(history, function(room, key) {
                 angular.forEach(room, function(entry, key) {
                     var i;
-                    alert(entry.calls);
+                    
                     for(i=entry.calls.length-1;i>=0;i--) {
-                        alert(entry.calls[i]);
-                        if(entry.calls[i].end === null) {
+                        if(entry.calls[i].end !== null) {
                             entry.calls.splice(i,1);
                         }
                     }
-                    alert(entry.calls);
+                    
                 });
             });
         } else {
