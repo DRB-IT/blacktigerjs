@@ -213,17 +213,24 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
     var cleanHistory = function (keepActiveCalls) {
         $log.debug('Resetting history data [keepActiveCalls=' + keepActiveCalls + ']');
         if(keepActiveCalls) {
+            
             angular.forEach(history, function(room, key) {
+                var entriesToDelete = [], i;
                 angular.forEach(room, function(entry, key) {
-                    var i;
-                    
                     for(i=entry.calls.length-1;i>=0;i--) {
                         if(entry.calls[i].end !== null) {
                             entry.calls.splice(i,1);
                         }
                     }
                     
+                    if(entry.calls.length === 0) {
+                        entriesToDelete.push(key);
+                    }
                 });
+                
+                for(i=0;i<entriesToDelete.length;i++) {
+                    delete room[entriesToDelete[i]];
+                }
             });
         } else {
             history = {};
