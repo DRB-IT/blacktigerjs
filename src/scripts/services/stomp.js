@@ -13,8 +13,13 @@ $btmod.factory('StompSvc', function ($rootScope) {
     var stompClient = {};
 
     function NGStomp(url) {
-        var ws = new SockJS(url);
-        this.stompClient = Stomp.over(ws);
+        if(url.indexOf('http://') === 0) {
+            url = 'ws://' + url.substr(7);
+        }
+        if(url.indexOf('https://') === 0) {
+            url = 'wss://' + url.substr(7);
+        }
+        this.stompClient = Stomp.client(url);
     }
 
     NGStomp.prototype.subscribe = function (queue, callback) {
