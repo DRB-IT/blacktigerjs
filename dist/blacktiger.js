@@ -910,43 +910,47 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
     var initializeSocket = function () {
         $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
-        
+
         var user = LoginSvc.getCurrentUser();
-        
-        if(!user) {
+
+        if (!user) {
             deferred.reject("Not authenticated via LoginSvc yet.");
             return deferred.promise;
         }
+
+        var fireInitialized = function() {
+            $rootScope.$broadcast('PushEventSvc.Initialized');
+            deferred.resolve();
+        };
         
         var connected = false;
         stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
         stompClient.connect(null, null, function () {
             connected = true;
-            RoomSvc.query('full').$promise.then(function (result) {
-                var rooms = [];
-                angular.forEach(result, function (room) {
-                    rooms.push(room);
-                    $rootScope.$broadcast('PushEvent.ConferenceStart', room, true);
-                });
 
-                if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
-                    stompClient.subscribe('/queue/events/*', function (message) {
-                        var e = angular.fromJson(message.body);
-                        handleEvent(e);
+            if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
+                stompClient.subscribe('/queue/events/*', function (message) {
+                    var e = angular.fromJson(message.body);
+                    handleEvent(e);
+                });
+                fireInitialized();
+            } else if (user.roles.indexOf('ROLE_HOST') >= 0 && rooms.length >= 1) {
+                RoomSvc.query('full').$promise.then(function (result) {
+                    var rooms = [];
+                    angular.forEach(result, function (room) {
+                        rooms.push(room);
+                        $rootScope.$broadcast('PushEvent.ConferenceStart', room, true);
                     });
-                } else if (user.roles.indexOf('ROLE_HOST') >= 0 && rooms.length >= 1) {
                     stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
                         var e = angular.fromJson(message.body);
                         handleEvent(e);
                     });
-                }
-                
-                $rootScope.$broadcast('PushEventSvc.Initialized');
-                deferred.resolve();
-            });
+                    fireInitialized();
+                });
+            }
 
         }, function (error) {
-            if(connected) {
+            if (connected) {
                 $rootScope.$broadcast('PushEventSvc.Lost_Connection', error);
                 connected = false;
             } else {
