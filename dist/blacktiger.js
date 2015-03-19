@@ -1172,10 +1172,12 @@ $btmod.factory('SystemSvc', ["$http", "blacktiger", "$q", function ($http, black
     return {
         getSystemInfo: function () {
             var deferred = $q.defer();
-            $http.get(blacktiger.getServiceUrl() + 'system/information').success(function (data) {
-                deferred.resolve(data);
-            }).error(function(data) {
-                deferred.reject(data);
+            $http.get(blacktiger.getServiceUrl() + 'system/information').then(function (resp) {
+                if(resp.status === 200) {
+                    deferred.resolve(resp.data);
+                } else {
+                    deferred.reject(resp);
+                }
             });
             return deferred.promise;
         }
