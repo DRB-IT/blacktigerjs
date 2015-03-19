@@ -934,17 +934,22 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
                     handleEvent(e);
                 });
                 fireInitialized();
-            } else if (user.roles.indexOf('ROLE_HOST') >= 0 && rooms.length >= 1) {
+            } else if (user.roles.indexOf('ROLE_HOST') >= 0) {
                 RoomSvc.query('full').$promise.then(function (result) {
                     var rooms = [];
                     angular.forEach(result, function (room) {
                         rooms.push(room);
                         $rootScope.$broadcast('PushEvent.ConferenceStart', room, true);
                     });
-                    stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
-                        var e = angular.fromJson(message.body);
-                        handleEvent(e);
-                    });
+                    
+                    if(rooms.length === 0) {
+                        $rootScope.$broadcast('PushEventSvc.NoRooms');
+                    } else {
+                        stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
+                            var e = angular.fromJson(message.body);
+                            handleEvent(e);
+                        });
+                    }
                     fireInitialized();
                 });
             }
