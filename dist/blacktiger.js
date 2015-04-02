@@ -224,6 +224,8 @@ $btmod.factory('HistorySvc', ["$rootScope", "localStorageService", "blacktiger",
                     
                     if(entry.calls.length === 0) {
                         entriesToDelete.push(key);
+                    } else {
+                        entry.firstCall = entry.calls[0].start;
                     }
                 });
                 
