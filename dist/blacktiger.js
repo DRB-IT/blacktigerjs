@@ -8,11 +8,10 @@
  * 
  * The `blacktiger` module defines services etc. for communicating with a Blacktiger server.
  * 
- * It requires ngCookies, ngResource and LocalStorageModule.
+ * It requires ngResource and LocalStorageModule.
  *
  */
 var $btmod = angular.module('blacktiger', [
-    'ngCookies',
     'ngResource',
     'LocalStorageModule'
 ]);
@@ -23,7 +22,7 @@ $btmod.config(["$httpProvider", function($httpProvider) {
 
 $btmod.run(["HistorySvc", function(HistorySvc) {
     // Dummy to make sure that HistorySvc is initialized from the beginning.
-    HistorySvc.getCookieName();
+    HistorySvc.getVariableName();
 }]);
 
 /*global $btmod*/
@@ -188,10 +187,10 @@ $btmod.factory('AutoCommentRequestCancelSvc', ["$rootScope", "$timeout", "CONFIG
  * 
  * On every update this service will broadcast 'History.Updated' without any parameters.
  */
-$btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log", function ($rootScope, $cookieStore, blacktiger, $log) {
+$btmod.factory('HistorySvc', ["$rootScope", "localStorageService", "blacktiger", "$log", function ($rootScope, localStorageService, blacktiger, $log) {
     $log.debug('Initializing HistorySvc');
-    var historyCookieName = 'meetingHistory-' + blacktiger.getInstanceId();
-    var history = $cookieStore.get(historyCookieName);
+    var historyVariableName = 'meetingHistory-' + blacktiger.getInstanceId();
+    var history = localStorageService.get(historyVariableName);
 
     var totalDurationForEntry = function (entry) {
         var duration = 0;
@@ -235,7 +234,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         } else {
             history = {};
         }
-        $cookieStore.put(historyCookieName, history);
+        localStorageService.set(historyVariableName, history);
         fireUpdated();
     };
 
@@ -319,7 +318,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         }
 
         $log.debug('Persisting history.');
-        $cookieStore.put(historyCookieName, history);
+        localStorageService.set(historyVariableName, history);
         fireUpdated();
     };
 
@@ -348,7 +347,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         }
         
         if (changed) {
-            $cookieStore.put(historyCookieName, history);
+            localStorageService.set(historyVariableName, history);
             fireUpdated();
         }
     };
@@ -366,7 +365,7 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
                 }
             });
         });
-        $cookieStore.put(historyCookieName, history);
+        localStorageService.set(historyVariableName, history);
         fireUpdated();
     };
 
@@ -452,8 +451,8 @@ $btmod.factory('HistorySvc', ["$rootScope", "$cookieStore", "blacktiger", "$log"
         findAllByRoomAndActive: function (room, active) {
             return doFind(angular.isObject(room) ? room.id : room, undefined, active);
         },
-        getCookieName: function () {
-            return historyCookieName;
+        getVariableName: function () {
+            return historyVariableName;
         }
     };
 }]);
@@ -582,6 +581,18 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
         return null;
     };
 
+    var hasHost = function (room) {
+        var i;
+        if (room && angular.isArray(room.participants)) {
+            for (i = 0; i < room.participants.length; i++) {
+                if (room.participants[i].host === true) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    
     var getParticipantFromRoomByChannel = function (room, channel) {
         var i;
         if (room && angular.isArray(room.participants)) {
@@ -704,6 +715,7 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
 
         if (participant !== null && participant.muted) {
             participant.muted = false;
+            participant.commentRequested = false;  // Force the comment request to false now – they have been unmuted
             $rootScope.$broadcast('Meeting.Change', room, participant);
         }
     };
@@ -778,8 +790,16 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
             participant.commentRequested = false;
         },
         unmuteByRoomAndChannel: function (room, participant) {
+            if(!hasHost(getRoomById(room))) {
+                $log.warn('Room \'' + room + '\' has no host. It is not possible to unmute participants in rooms without a host.')
+                return;
+            }
+
             ParticipantSvc.unmute(room, participant.channel);
             participant.commentRequested = false;
+        },
+        clear: function() {
+            rooms = [];
         }
     };
 }]);
