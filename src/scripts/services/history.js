@@ -50,6 +50,8 @@ $btmod.factory('HistorySvc', function ($rootScope, localStorageService, blacktig
                     
                     if(entry.calls.length === 0) {
                         entriesToDelete.push(key);
+                    } else {
+                        entry.firstCall = entry.calls[0].start.getTime();
                     }
                 });
                 
