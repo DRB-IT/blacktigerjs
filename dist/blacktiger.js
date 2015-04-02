@@ -949,14 +949,17 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
         stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
         stompClient.connect(null, null, function () {
             connected = true;
+            $rootScope.$broadcast('PushEventSvc.WebsocketConnected');
 
             if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
+                $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
                 stompClient.subscribe('/queue/events/*', function (message) {
                     var e = angular.fromJson(message.body);
                     handleEvent(e);
                 });
                 fireInitialized();
             } else if (user.roles.indexOf('ROLE_HOST') >= 0) {
+                $rootScope.$broadcast('PushEventSvc.ResolvingRooms');
                 RoomSvc.query('full').$promise.then(function (result) {
                     var rooms = [];
                     angular.forEach(result, function (room) {
@@ -967,6 +970,7 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
                     if(rooms.length === 0) {
                         $rootScope.$broadcast('PushEventSvc.NoRooms');
                     } else {
+                        $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
                         stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
                             var e = angular.fromJson(message.body);
                             handleEvent(e);
@@ -974,6 +978,9 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
                     }
                     fireInitialized();
                 });
+            } else {
+                $rootScope.$broadcast('PushEventSvc.NoRooms');
+                fireInitialized();
             }
 
         }, function (error) {
