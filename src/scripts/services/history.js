@@ -13,10 +13,10 @@
  * 
  * On every update this service will broadcast 'History.Updated' without any parameters.
  */
-$btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $log) {
+$btmod.factory('HistorySvc', function ($rootScope, localStorageService, blacktiger, $log) {
     $log.debug('Initializing HistorySvc');
-    var historyCookieName = 'meetingHistory-' + blacktiger.getInstanceId();
-    var history = $cookieStore.get(historyCookieName);
+    var historyVariableName = 'meetingHistory-' + blacktiger.getInstanceId();
+    var history = localStorageService.get(historyVariableName);
 
     var totalDurationForEntry = function (entry) {
         var duration = 0;
@@ -60,7 +60,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
         } else {
             history = {};
         }
-        $cookieStore.put(historyCookieName, history);
+        localStorageService.set(historyVariableName, history);
         fireUpdated();
     };
 
@@ -144,7 +144,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
         }
 
         $log.debug('Persisting history.');
-        $cookieStore.put(historyCookieName, history);
+        localStorageService.set(historyVariableName, history);
         fireUpdated();
     };
 
@@ -173,7 +173,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
         }
         
         if (changed) {
-            $cookieStore.put(historyCookieName, history);
+            localStorageService.set(historyVariableName, history);
             fireUpdated();
         }
     };
@@ -191,7 +191,7 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
                 }
             });
         });
-        $cookieStore.put(historyCookieName, history);
+        localStorageService.set(historyVariableName, history);
         fireUpdated();
     };
 
@@ -277,8 +277,8 @@ $btmod.factory('HistorySvc', function ($rootScope, $cookieStore, blacktiger, $lo
         findAllByRoomAndActive: function (room, active) {
             return doFind(angular.isObject(room) ? room.id : room, undefined, active);
         },
-        getCookieName: function () {
-            return historyCookieName;
+        getVariableName: function () {
+            return historyVariableName;
         }
     };
 });

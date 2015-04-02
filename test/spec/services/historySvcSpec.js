@@ -13,6 +13,9 @@ describe('Unit testing HistorySvc', function () {
         historySvc = _HistorySvc_;
         $rootScope = _$rootScope_;
         $log = _$log_;
+        
+        historySvc.deleteAll();
+        
         $rootScope.$broadcast('PushEvent.ConferenceStart', {id: 'H45-0000'});
     }));
 
@@ -185,7 +188,7 @@ describe('Unit testing HistorySvc', function () {
     });
 
     it('exposes the history cookie name', function () {
-        expect(historySvc.getCookieName()).not.toBe(null);
+        expect(historySvc.getVariableName()).not.toBe(null);
     });
 
     it('handles synchronizes history data with events sent on PushEventSvc connect.', function () {
