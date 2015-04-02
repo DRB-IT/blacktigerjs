@@ -159,6 +159,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
 
         if (participant !== null && participant.muted) {
             participant.muted = false;
+            participant.commentRequested = false;  // Force the comment request to false now – they have been unmuted
             $rootScope.$broadcast('Meeting.Change', room, participant);
         }
     };
