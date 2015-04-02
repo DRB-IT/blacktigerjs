@@ -83,11 +83,20 @@ describe('Unit testing ParticipantSvc', function() {
         var participants= [
                     {
                         userId: 1,
+                        muted: true,
+                        host: false,
+                        phoneNumber: 'PC-xxxxxxx1',
+                        dateJoined: 1349333576093,
+                        name: 'Testlistener',
+                        commentRequested: false
+                    },
+                    {
+                        userId: 2,
                         muted: false,
                         host: true,
-                        phoneNumber: 'PC-xxxxxxxx',
+                        phoneNumber: 'PC-xxxxxxx2',
                         dateJoined: 1349333576093,
-                        name: 'Testsal',
+                        name: 'Testhall',
                         commentRequested: false
                     }
                 ];
@@ -118,10 +127,19 @@ describe('Unit testing ParticipantSvc', function() {
                     {
                         userId: 1,
                         muted: true,
-                        host: true,
-                        phoneNumber: 'PC-xxxxxxxx',
+                        host: false,
+                        phoneNumber: 'PC-xxxxxxx1',
                         dateJoined: 1349333576093,
-                        name: 'Testsal',
+                        name: 'Testlistener',
+                        commentRequested: false
+                    },
+                    {
+                        userId: 2,
+                        muted: false,
+                        host: true,
+                        phoneNumber: 'PC-xxxxxxx2',
+                        dateJoined: 1349333576093,
+                        name: 'Testhall',
                         commentRequested: false
                     }
                 ];
@@ -143,5 +161,5 @@ describe('Unit testing ParticipantSvc', function() {
 
         expect(participants[0].muted).toBe(false);
     });
-
+    
 });

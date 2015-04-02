@@ -25,6 +25,18 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
         return null;
     };
 
+    var hasHost = function (room) {
+        var i;
+        if (room && angular.isArray(room.participants)) {
+            for (i = 0; i < room.participants.length; i++) {
+                if (room.participants[i].host === true) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    
     var getParticipantFromRoomByChannel = function (room, channel) {
         var i;
         if (room && angular.isArray(room.participants)) {
@@ -221,8 +233,16 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
             participant.commentRequested = false;
         },
         unmuteByRoomAndChannel: function (room, participant) {
+            if(!hasHost(getRoomById(room))) {
+                $log.warn('Room \'' + room + '\' has no host. It is not possible to unmute participants in rooms without a host.')
+                return;
+            }
+
             ParticipantSvc.unmute(room, participant.channel);
             participant.commentRequested = false;
+        },
+        clear: function() {
+            rooms = [];
         }
     };
 });
