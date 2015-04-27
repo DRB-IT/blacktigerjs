@@ -53,6 +53,19 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, LoginSvc
 
     };
 
+    var resolveRooms = function() {
+        $rootScope.$broadcast('PushEventSvc.ResolvingRooms');
+        return RoomSvc.query('full').$promise.then(function (result) {
+            var rooms = [];
+            angular.forEach(result, function (room) {
+                rooms.push(room);
+                $rootScope.$broadcast('PushEvent.ConferenceStart', room, true);
+            });
+
+            return rooms;
+        });
+    };
+    
     var initializeSocket = function (options) {
         $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
@@ -77,21 +90,18 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, LoginSvc
             $rootScope.$broadcast('PushEventSvc.WebsocketConnected');
 
             if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
-                $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
-                stompClient.subscribe('/queue/events/*', function (message) {
-                    var e = angular.fromJson(message.body);
-                    handleEvent(e);
-                });
-                fireInitialized();
-            } else if (user.roles.indexOf('ROLE_HOST') >= 0) {
-                $rootScope.$broadcast('PushEventSvc.ResolvingRooms');
-                RoomSvc.query('full').$promise.then(function (result) {
-                    var rooms = [];
-                    angular.forEach(result, function (room) {
-                        rooms.push(room);
-                        $rootScope.$broadcast('PushEvent.ConferenceStart', room, true);
+                resolveRooms().then(function (rooms) {
+                    $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
+                    stompClient.subscribe('/queue/events/*', function (message) {
+                        var e = angular.fromJson(message.body);
+                        handleEvent(e);
                     });
-                    
+                    fireInitialized();
+                });
+                
+                
+            } else if (user.roles.indexOf('ROLE_HOST') >= 0) {
+                resolveRooms().then(function (rooms) {
                     if(rooms.length === 0) {
                         $rootScope.$broadcast('PushEventSvc.NoRooms');
                     } else {
