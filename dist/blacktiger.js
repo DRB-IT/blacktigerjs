@@ -1107,6 +1107,7 @@ $btmod.factory('SipUserSvc', ["$http", "blacktiger", "$rootScope", "$q", functio
  */
 $btmod.factory('StompSvc', ["$rootScope", function ($rootScope) {
     var stompClient = {};
+    var heartbeatPromise = null;
 
     function NGStomp(url) {
         if(url.indexOf('http://') === 0) {
@@ -1131,16 +1132,25 @@ $btmod.factory('StompSvc', ["$rootScope", function ($rootScope) {
         this.stompClient.send(queue, headers, data);
     };
 
-    NGStomp.prototype.connect = function (user, password, onConnect, onError) {
+    NGStomp.prototype.connect = function (user, password, onConnect, onError, enforcedHeartbeatInterval) {
         // The Spring Stomp implementation does not like user/password, even though it should just ignore it.
         // Sending empty headers instead of user/pass.
+        var that = this;
         this.stompClient.connect({},
                 function (frame) {
+                    if(angular.isNumber(enforcedHeartbeatInterval)) {
+                        that.heartbeatPromise = $interval(function() {
+                            that.stompClient.ws.send('\x0A');
+                        }, enforcedHeartbeatInterval);
+                    }
                     $rootScope.$apply(function () {
                         onConnect.apply(stompClient, frame);
                     });
                 },
                 function (frame) {
+                    if(angular.isDefined(that.heartbeatPromise)) {
+                        $interval.cancel(that.heartbeatPromise);
+                    }
                     $rootScope.$apply(function () {
                         onError.apply(frame);
                     });
