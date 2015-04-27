@@ -64,10 +64,9 @@
  * Service for communicating with the server over the Stomp protocol.
  * See http://jmesnil.net/stomp-websocket/doc/ for more info.
  */
-$btmod.factory('StompSvc', function ($rootScope) {
+$btmod.factory('StompSvc', function ($rootScope, $interval) {
     var stompClient = {};
-    var heartbeatPromise = null;
-
+    
     function NGStomp(url) {
         if(url.indexOf('http://') === 0) {
             url = 'ws://' + url.substr(7);

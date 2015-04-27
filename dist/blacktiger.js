@@ -929,9 +929,10 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
 
     };
 
-    var initializeSocket = function () {
+    var initializeSocket = function (options) {
         $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
+        var _options = angular.isObject(options) ? options : {};
 
         var user = LoginSvc.getCurrentUser();
 
@@ -990,13 +991,13 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
             } else {
                 deferred.reject(error);
             }
-        }, '/');
+        }, _options.enforcedHeartbeatInterval);
         return deferred.promise;
     };
 
     return {
-        connect: function () {
-            return initializeSocket();
+        connect: function (options) {
+            return initializeSocket(options);
         },
         disconnect: function () {
             var deferred = $q.defer();
@@ -1105,10 +1106,9 @@ $btmod.factory('SipUserSvc', ["$http", "blacktiger", "$rootScope", "$q", functio
  * Service for communicating with the server over the Stomp protocol.
  * See http://jmesnil.net/stomp-websocket/doc/ for more info.
  */
-$btmod.factory('StompSvc', ["$rootScope", function ($rootScope) {
+$btmod.factory('StompSvc', ["$rootScope", "$interval", function ($rootScope, $interval) {
     var stompClient = {};
-    var heartbeatPromise = null;
-
+    
     function NGStomp(url) {
         if(url.indexOf('http://') === 0) {
             url = 'ws://' + url.substr(7);
