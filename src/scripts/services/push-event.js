@@ -53,9 +53,10 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, LoginSvc
 
     };
 
-    var initializeSocket = function () {
+    var initializeSocket = function (options) {
         $rootScope.$broadcast('PushEventSvc.Initializing');
         var deferred = $q.defer();
+        var _options = angular.isObject(options) ? options : {};
 
         var user = LoginSvc.getCurrentUser();
 
@@ -114,13 +115,13 @@ $btmod.factory('PushEventSvc', function ($rootScope, StompSvc, RoomSvc, LoginSvc
             } else {
                 deferred.reject(error);
             }
-        }, '/');
+        }, _options.enforcedHeartbeatInterval);
         return deferred.promise;
     };
 
     return {
-        connect: function () {
-            return initializeSocket();
+        connect: function (options) {
+            return initializeSocket(options);
         },
         disconnect: function () {
             var deferred = $q.defer();
