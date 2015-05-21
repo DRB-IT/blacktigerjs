@@ -36,7 +36,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
         }
         return false;
     };
-    
+
     var getParticipantFromRoomByChannel = function (room, channel) {
         var i;
         if (room && angular.isArray(room.participants)) {
@@ -61,8 +61,18 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
         }
         return count;
     };
-    
-    var handleInitializing = function() {
+
+    var handleInitializing = function () {
+        rooms = [];
+    };
+
+    var handleLostConnection = function () {
+        angular.forEach(rooms, function (room) {
+            angular.forEach(room.participants, function (participant) {
+                handleLeave(null, room.id, participant.channel);
+            });
+            handleConfEnd(null, room.id);
+        });
         rooms = [];
     };
 
@@ -176,8 +186,9 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
         });
 
     };
-                    
+
     $rootScope.$on('PushEventSvc.Initializing', handleInitializing);
+    $rootScope.$on('PushEventSvc.Lost_Connection', handleLostConnection);
     $rootScope.$on('PushEvent.ConferenceStart', handleConfStart);
     $rootScope.$on('PushEvent.ConferenceEnd', handleConfEnd);
     $rootScope.$on('PushEvent.Join', handleJoin);
@@ -234,7 +245,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
             participant.commentRequested = false;
         },
         unmuteByRoomAndChannel: function (room, participant) {
-            if(!hasHost(getRoomById(room))) {
+            if (!hasHost(getRoomById(room))) {
                 $log.warn('Room \'' + room + '\' has no host. It is not possible to unmute participants in rooms without a host.')
                 return;
             }
@@ -242,7 +253,7 @@ $btmod.factory('MeetingSvc', function ($rootScope, PushEventSvc, ParticipantSvc,
             ParticipantSvc.unmute(room, participant.channel);
             participant.commentRequested = false;
         },
-        clear: function() {
+        clear: function () {
             rooms = [];
         }
     };
