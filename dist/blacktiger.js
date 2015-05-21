@@ -984,7 +984,7 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
                             var e = angular.fromJson(message.body);
                             handleEvent(e);
                         });
-                        fireInitialized();
+                        fireInitialized(deferred);
                     });
 
 
@@ -999,11 +999,11 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
                                 handleEvent(e);
                             });
                         }
-                        fireInitialized();
+                        fireInitialized(deferred);
                     });
                 } else {
                     $rootScope.$broadcast('PushEventSvc.NoRooms');
-                    fireInitialized();
+                    fireInitialized(deferred);
                 }
 
             }, function (error) {
