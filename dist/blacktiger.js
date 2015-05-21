@@ -594,7 +594,7 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
         }
         return false;
     };
-    
+
     var getParticipantFromRoomByChannel = function (room, channel) {
         var i;
         if (room && angular.isArray(room.participants)) {
@@ -619,8 +619,18 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
         }
         return count;
     };
-    
-    var handleInitializing = function() {
+
+    var handleInitializing = function () {
+        rooms = [];
+    };
+
+    var handleLostConnection = function () {
+        angular.forEach(rooms, function (room) {
+            angular.forEach(room.participants, function (participant) {
+                handleLeave(null, room.id, participant.channel);
+            });
+            handleConfEnd(null, room.id);
+        });
         rooms = [];
     };
 
@@ -734,8 +744,9 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
         });
 
     };
-                    
+
     $rootScope.$on('PushEventSvc.Initializing', handleInitializing);
+    $rootScope.$on('PushEventSvc.Lost_Connection', handleLostConnection);
     $rootScope.$on('PushEvent.ConferenceStart', handleConfStart);
     $rootScope.$on('PushEvent.ConferenceEnd', handleConfEnd);
     $rootScope.$on('PushEvent.Join', handleJoin);
@@ -792,7 +803,7 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
             participant.commentRequested = false;
         },
         unmuteByRoomAndChannel: function (room, participant) {
-            if(!hasHost(getRoomById(room))) {
+            if (!hasHost(getRoomById(room))) {
                 $log.warn('Room \'' + room + '\' has no host. It is not possible to unmute participants in rooms without a host.')
                 return;
             }
@@ -800,7 +811,7 @@ $btmod.factory('MeetingSvc', ["$rootScope", "PushEventSvc", "ParticipantSvc", "$
             ParticipantSvc.unmute(room, participant.channel);
             participant.commentRequested = false;
         },
-        clear: function() {
+        clear: function () {
             rooms = [];
         }
     };
@@ -898,7 +909,7 @@ $btmod.factory('PhoneBookSvc', ["$http", "blacktiger", "$rootScope", function ($
  * - 'Mute' will be broadcast as 'PushEvent.Mute' with roomNo and channel as parameter.
  * - 'Unmute' will be broadcast as 'PushEvent.Unmute' with roomNo and channel as parameter.
  */
-$btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc", "blacktiger", "$log", "$q", function ($rootScope, StompSvc, RoomSvc, LoginSvc, blacktiger, $log, $q) {
+$btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc", "blacktiger", "$log", "$q", "$interval", function ($rootScope, StompSvc, RoomSvc, LoginSvc, blacktiger, $log, $q, $interval) {
     var stompClient;
 
     var handleEvent = function (event) {
@@ -929,7 +940,7 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
 
     };
 
-    var resolveRooms = function() {
+    var resolveRooms = function () {
         $rootScope.$broadcast('PushEventSvc.ResolvingRooms');
         return RoomSvc.query('full').$promise.then(function (result) {
             var rooms = [];
@@ -941,10 +952,9 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
             return rooms;
         });
     };
-    
+
     var initializeSocket = function (options) {
-        $rootScope.$broadcast('PushEventSvc.Initializing');
-        var deferred = $q.defer();
+        
         var _options = angular.isObject(options) ? options : {};
 
         var user = LoginSvc.getCurrentUser();
@@ -954,55 +964,76 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
             return deferred.promise;
         }
 
-        var fireInitialized = function() {
+        var fireInitialized = function (deferred) {
             $rootScope.$broadcast('PushEventSvc.Initialized');
             deferred.resolve();
         };
-        
-        var connected = false;
-        stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
-        stompClient.connect(null, null, function () {
-            connected = true;
-            $rootScope.$broadcast('PushEventSvc.WebsocketConnected');
 
-            if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
-                resolveRooms().then(function (rooms) {
-                    $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
-                    stompClient.subscribe('/queue/events/*', function (message) {
-                        var e = angular.fromJson(message.body);
-                        handleEvent(e);
-                    });
-                    fireInitialized();
-                });
-                
-                
-            } else if (user.roles.indexOf('ROLE_HOST') >= 0) {
-                resolveRooms().then(function (rooms) {
-                    if(rooms.length === 0) {
-                        $rootScope.$broadcast('PushEventSvc.NoRooms');
-                    } else {
+        var connectClient = function () {
+            $rootScope.$broadcast('PushEventSvc.Initializing');
+            var deferred = $q.defer();
+            stompClient = StompSvc(blacktiger.getServiceUrl() + 'socket'); // jshint ignore:line
+            stompClient.connect(null, null, function () {
+                connected = true;
+                $rootScope.$broadcast('PushEventSvc.WebsocketConnected');
+
+                if (user.roles.indexOf('ROLE_ADMIN') >= 0) {
+                    resolveRooms().then(function (rooms) {
                         $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
-                        stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
+                        stompClient.subscribe('/queue/events/*', function (message) {
                             var e = angular.fromJson(message.body);
                             handleEvent(e);
                         });
-                    }
-                    fireInitialized();
-                });
-            } else {
-                $rootScope.$broadcast('PushEventSvc.NoRooms');
-                fireInitialized();
-            }
+                        fireInitialized();
+                    });
 
-        }, function (error) {
-            if (connected) {
-                $rootScope.$broadcast('PushEventSvc.Lost_Connection', error);
-                connected = false;
-            } else {
-                deferred.reject(error);
-            }
-        }, _options.enforcedHeartbeatInterval);
-        return deferred.promise;
+
+                } else if (user.roles.indexOf('ROLE_HOST') >= 0) {
+                    resolveRooms().then(function (rooms) {
+                        if (rooms.length === 0) {
+                            $rootScope.$broadcast('PushEventSvc.NoRooms');
+                        } else {
+                            $rootScope.$broadcast('PushEventSvc.SubscribingEvents');
+                            stompClient.subscribe('/queue/events/' + rooms[0].id, function (message) {
+                                var e = angular.fromJson(message.body);
+                                handleEvent(e);
+                            });
+                        }
+                        fireInitialized();
+                    });
+                } else {
+                    $rootScope.$broadcast('PushEventSvc.NoRooms');
+                    fireInitialized();
+                }
+
+            }, function (error) {
+                if (connected) {
+                    $rootScope.$broadcast('PushEventSvc.Lost_Connection', error);
+                    connected = false;
+                } else {
+                    deferred.reject(error);
+                }
+            }, _options.enforcedHeartbeatInterval);
+            return deferred.promise;
+        };
+
+        var connected = false;
+        var promise = connectClient();
+        
+        if(options.keepAlive) {
+            $rootScope.$on('PushEventSvc.Lost_Connection', function() {
+                var reconnectPromise = $interval(function() {
+                    $rootScope.$broadcast('PushEventSvc.Reconnecting');
+                    connectClient().then(function() {
+                       $interval.cancel(reconnectPromise);
+                    }, function() {
+                        $rootScope.$broadcast('PushEventSvc.ReconnectingFailed');
+                    });
+                }, 10000);
+            });
+        }
+        
+        return promise;
     };
 
     return {
