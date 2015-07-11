@@ -1061,7 +1061,7 @@ $btmod.factory('PushEventSvc', ["$rootScope", "StompSvc", "RoomSvc", "LoginSvc",
  * @memberOf! blacktiger#
  * @name RoomSvc
  * @description
- * 
+ *
  * Service for retreiving the rooms the current user has access to.
  */
 $btmod.factory('RoomSvc', ["blacktiger", "$resource", function (blacktiger, $resource) {
@@ -1071,12 +1071,13 @@ $btmod.factory('RoomSvc', ["blacktiger", "$resource", function (blacktiger, $res
         }
     });
     return {
-        query: function (mode) {
-            var params;
+        query: function (mode, search) {
+            var params = {};
             if (mode) {
-                params = {
-                    mode: mode
-                };
+                params['mode'] = mode;
+            }
+            if(search) {
+                params['search'] = search;
             }
             return resource.query(params);
         },
