@@ -1076,7 +1076,7 @@ $btmod.factory('RoomSvc', ["blacktiger", "$resource", function (blacktiger, $res
             if (mode) {
                 params['mode'] = mode;
             }
-            if(search) {
+            if(search === '' || search) {
                 params['search'] = search;
             }
             return resource.query(params);
